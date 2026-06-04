@@ -224,10 +224,22 @@ input[type=file]{display:none}
       </div>
       <div style="margin-bottom:.7rem">
         <label style="display:block;margin-bottom:.35rem">Itens Attunados <span style="font-family:var(--fN);font-size:.68rem;color:var(--muted)">(opcionais, máx. 3)</span></label>
-        <div style="display:flex;flex-direction:column;gap:.4rem" id="pj_at_container">
-          <div id="pj_at_row_0" style="display:flex;gap:.4rem;align-items:center"></div>
-          <div id="pj_at_row_1" style="display:flex;gap:.4rem;align-items:center"></div>
-          <div id="pj_at_row_2" style="display:flex;gap:.4rem;align-items:center"></div>
+        <div style="display:flex;flex-direction:column;gap:.4rem">
+          <div style="display:flex;gap:.4rem;align-items:center">
+            <select id="pj_at1" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem"><option value="">— Item 1 (vincular) —</option></select>
+            <span style="font-family:var(--fN);font-size:.75rem;color:var(--muted)">ou</span>
+            <input type="text" id="pj_at1m" placeholder="Item 1 manual" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem">
+          </div>
+          <div style="display:flex;gap:.4rem;align-items:center">
+            <select id="pj_at2" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem"><option value="">— Item 2 (vincular) —</option></select>
+            <span style="font-family:var(--fN);font-size:.75rem;color:var(--muted)">ou</span>
+            <input type="text" id="pj_at2m" placeholder="Item 2 manual" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem">
+          </div>
+          <div style="display:flex;gap:.4rem;align-items:center">
+            <select id="pj_at3" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem"><option value="">— Item 3 (vincular) —</option></select>
+            <span style="font-family:var(--fN);font-size:.75rem;color:var(--muted)">ou</span>
+            <input type="text" id="pj_at3m" placeholder="Item 3 manual" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem">
+          </div>
         </div>
       </div>
       <label class="ulabel" for="pj_img">⬡ Clique para carregar imagem</label>
@@ -933,19 +945,28 @@ function renderPJDash(){
   </div>`;
 }
 function renderPJs(){
-  renderPJDash();const el=document.getElementById('pjGrid');const pjs=AC().personagens||[];
+  renderPJDash();
+  const el=document.getElementById('pjGrid');
+  const pjs=AC().personagens||[];
   if(!pjs.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum personagem ainda.</div>';return;}
-  el.innerHTML=pjs.map(p=>`
+  el.innerHTML=pjs.map((p,idx)=>`
     <div class="fCard" draggable="true" ondragstart="pjDrag(event,${p.id})" ondragover="pjDragOv(event)" ondrop="pjDrop(event,${p.id})" ondragleave="this.classList.remove('drag-over')">
       <div class="fImg" onclick="openPJPopup(${p.id})">${p.img?`<img src="${p.img}" alt="${p.name}">`:'⬡'}</div>
       <div class="fName">${p.name}</div>
       ${p.type?`<div class="tBadge">${p.type}</div>`:''}
       <div class="fMeta">${[p.hpMax?'HP:'+p.hpMax:'',p.ac?'AC:'+p.ac:'',p.pp?'PP:'+p.pp:'',p.cristais?'💎'+p.cristais:''].filter(Boolean).join(' · ')}</div>
-      ${p.attunados&&p.attunados.length?`<div style="font-family:var(--fN);font-size:.68rem;color:var(--muted);margin-bottom:.3rem">${p.attunados.map(it=>`<span style="cursor:pointer;color:var(--red)" onclick="openItemPopupByName('${it.replace(/'/g,"\\'")}')">⚡ ${it}</span>`).join(' · ')}</div>`:''}
+      ${p.attunados&&p.attunados.length?`<div style="font-family:var(--fN);font-size:.68rem;color:var(--muted);margin-bottom:.3rem">${p.attunados.map(it=>`<span style="cursor:pointer;color:var(--red)" onclick="openItemPopupByName('${it.replace(/'/g,"\\'")}')" >⚡ ${it}</span>`).join(' · ')}</div>`:''}
       ${p.bg?`<div style="font-family:var(--fB);font-size:.75rem;color:var(--muted);font-style:italic;margin-bottom:.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${p.bg}</div>`:''}
-      <button class="btn btnOut sm" style="width:100%;margin-top:.3rem" onclick="openEditPJ(${p.id})">✏ Editar</button>
+      <button class="btn btnOut sm" style="width:100%;margin-top:.3rem" onclick="openEditPJ_byIdx(${idx})">✏ Editar</button>
       <button class="btn btnDng sm" style="width:100%;margin-top:.3rem" onclick="removePJ(${p.id})">✕ Remover</button>
     </div>`).join('');
+}
+
+function openEditPJ_byIdx(idx){
+  const pjs=AC().personagens||[];
+  const p=pjs[idx];
+  if(!p)return;
+  openEditPJ(p.id);
 }
 function refreshPJSelectInParty(){const s=document.getElementById('pmPJLink');if(!s)return;const pjs=AC().personagens||[];s.innerHTML='<option value="">— ou preencha manualmente —</option>'+pjs.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');}
 function pjDrag(e,id){pjDragSrc=id;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
