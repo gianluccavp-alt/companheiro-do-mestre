@@ -513,42 +513,61 @@ function openM(id){document.getElementById(id).classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
 
 // ===== STORAGE =====
+// ===== STORAGE — IndexedDB + localStorage fallback =====
+let _db=null;
+
+function openDB(){
+  return new Promise((res,rej)=>{
+    if(_db){res(_db);return;}
+    const req=indexedDB.open('CompanheiroMestre',1);
+    req.onupgradeneeded=e=>{e.target.result.createObjectStore('kv');};
+    req.onsuccess=e=>{_db=e.target.result;res(_db);};
+    req.onerror=e=>rej(e);
+  });
+}
+function idbSet(key,val){
+  return openDB().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction('kv','readwrite');
+    tx.objectStore('kv').put(val,key);
+    tx.oncomplete=res;tx.onerror=rej;
+  }));
+}
+function idbGet(key){
+  return openDB().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction('kv','readonly');
+    const req=tx.objectStore('kv').get(key);
+    req.onsuccess=e=>res(e.target.result);
+    req.onerror=rej;
+  }));
+}
+
 function persist(){
   const data=JSON.stringify({campaigns,activeId});
-  let saved=false;
-  try{localStorage.setItem('nc_data',data);saved=true;}catch(e){console.error('localStorage failed:',e);}
-  if(!saved){
-    try{sessionStorage.setItem('nc_data',data);}catch(e){console.error('sessionStorage failed:',e);}
-  }
+  // 1. IndexedDB (primary — survives PWA close)
+  idbSet('nc_data',data).catch(e=>console.error('IDB save failed:',e));
+  // 2. localStorage (backup)
+  try{localStorage.setItem('nc_data',data);}catch(e){}
+  // 3. window.storage (Claude sandbox)
   try{if(window.storage&&window.storage.set)window.storage.set('nc_data',data);}catch(e){}
 }
 
 async function loadStorage(){
-  // 1. localStorage
+  // 1. IndexedDB
+  try{
+    const raw=await idbGet('nc_data');
+    if(raw){const d=JSON.parse(raw);if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;console.log('Loaded from IndexedDB');return;}}
+  }catch(e){console.error('IDB load failed:',e);}
+  // 2. localStorage
   try{
     const raw=localStorage.getItem('nc_data');
-    if(raw){
-      const d=JSON.parse(raw);
-      if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;console.log('Loaded from localStorage, campaigns:',campaigns.length);return;}
-    }
-  }catch(e){console.error('localStorage load failed:',e);}
-  // 2. sessionStorage
-  try{
-    const raw=sessionStorage.getItem('nc_data');
-    if(raw){
-      const d=JSON.parse(raw);
-      if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;console.log('Loaded from sessionStorage');return;}
-    }
+    if(raw){const d=JSON.parse(raw);if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;console.log('Loaded from localStorage');return;}}
   }catch(e){}
-  // 3. window.storage (Claude sandbox)
+  // 3. window.storage
   try{
     const r=await window.storage.get('nc_data');
-    if(r&&r.value){
-      const d=JSON.parse(r.value);
-      if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;console.log('Loaded from window.storage');return;}
-    }
+    if(r&&r.value){const d=JSON.parse(r.value);if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;console.log('Loaded from window.storage');return;}}
   }catch(e){}
-  console.log('No saved data found, starting fresh.');
+  console.log('No saved data found.');
 }
 function ensureDefaults(){
   if(!campaigns.length){const id='c'+Date.now();campaigns=[{id,name:'Campanha Principal',diary:[],fichas:[],party:[],creatures:[],personagens:[],itens:[],currentTurn:-1}];activeId=id;}
@@ -845,13 +864,13 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
   await loadStorage();
   ensureDefaults();
   renderAll();
-  // show storage status
   const el=document.getElementById('storageStatus');
   if(el){
-    let status='';
-    try{localStorage.setItem('_test','1');localStorage.removeItem('_test');status='💾 Salvando em localStorage';}
-    catch(e){status='⚠ localStorage indisponível — dados não serão salvos ao fechar';}
-    el.textContent=status;
+    try{await idbSet('_test','ok');el.textContent='💾 Salvando em IndexedDB (persistente)';}
+    catch(e){
+      try{localStorage.setItem('_test','1');localStorage.removeItem('_test');el.textContent='💾 Salvando em localStorage';}
+      catch(e2){el.textContent='⚠ Sem armazenamento disponível';}
+    }
   }
 })();
 </script>
