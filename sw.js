@@ -1,14 +1,14 @@
-const CACHE = 'companheiro-v5';
-const FILES = [
+const CACHE = 'companheiro-v6';
+
+const ASSETS = [
+  './',
   './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Source+Sans+3:wght@400;600&display=swap'
 ];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(FILES))
+    caches.open(CACHE).then(c => c.addAll(ASSETS))
   );
   self.skipWaiting();
 });
