@@ -224,10 +224,10 @@ input[type=file]{display:none}
       </div>
       <div style="margin-bottom:.7rem">
         <label style="display:block;margin-bottom:.35rem">Itens Attunados <span style="font-family:var(--fN);font-size:.68rem;color:var(--muted)">(opcionais, máx. 3)</span></label>
-        <div class="fRow" style="margin-bottom:0">
-          <div class="fGrp"><select id="pj_at1"><option value="">— Item 1 —</option></select></div>
-          <div class="fGrp"><select id="pj_at2"><option value="">— Item 2 —</option></select></div>
-          <div class="fGrp"><select id="pj_at3"><option value="">— Item 3 —</option></select></div>
+        <div style="display:flex;flex-direction:column;gap:.4rem" id="pj_at_container">
+          <div id="pj_at_row_0" style="display:flex;gap:.4rem;align-items:center"></div>
+          <div id="pj_at_row_1" style="display:flex;gap:.4rem;align-items:center"></div>
+          <div id="pj_at_row_2" style="display:flex;gap:.4rem;align-items:center"></div>
         </div>
       </div>
       <label class="ulabel" for="pj_img">⬡ Clique para carregar imagem</label>
@@ -465,6 +465,16 @@ input[type=file]{display:none}
   <div style="text-align:right;margin-top:.9rem"><button class="btn btnRed" onclick="saveEditPJ()">Salvar</button></div>
 </div></div>
 
+<!-- Generic image popup (item/personagem) -->
+<div class="mOv" id="mGenPopup" onclick="if(event.target===this)closeM('mGenPopup')">
+  <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:.7rem;max-width:92vw">
+    <button onclick="closeM('mGenPopup')" style="position:absolute;top:-2rem;right:0;background:transparent;border:none;color:#ccc;font-size:1.3rem;cursor:pointer">✕</button>
+    <p id="mGenPopupName" style="font-family:var(--fH);font-weight:700;font-size:1.1rem;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)"></p>
+    <img id="mGenPopupImg" style="max-width:90vw;max-height:80vh;object-fit:contain;border-radius:4px;border:2px solid var(--border2);display:none;box-shadow:0 4px 24px rgba(0,0,0,.5)" src="" alt="">
+    <div id="mGenPopupNoImg" style="display:none;background:var(--bg2);border:2px solid var(--border);border-radius:4px;padding:1.5rem 2.5rem;color:var(--muted);font-style:italic">Sem imagem</div>
+  </div>
+</div>
+
 <div class="mOv" id="mEditItem"><div class="modal" style="max-width:460px;width:90vw">
   <button class="mClose" onclick="closeM('mEditItem')">✕</button><h3>Editar Item</h3>
   <input type="hidden" id="eItId">
@@ -685,7 +695,19 @@ function nextTurn(){const camp=AC();if(!camp.creatures.length)return;const alive
 function resetTurns(){AC().currentTurn=-1;document.getElementById('tBanner').style.display='none';persist();renderCreatures();}
 function removeCreature(id){const camp=AC();camp.creatures=camp.creatures.filter(c=>c.id!==id);if(camp.currentTurn>=camp.creatures.length)camp.currentTurn=camp.creatures.length-1;persist();renderCreatures();}
 function refreshFichaSelect(){const s=document.getElementById('cFichaLink');s.innerHTML='<option value="">— nenhuma —</option>'+AC().fichas.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');}
-function openFichaFromCreature(cid){const camp=AC();const c=camp.creatures.find(c=>c.id===cid);if(!c)return;document.getElementById('fpName').textContent=c.name;const f=c.fichaId?camp.fichas.find(f=>String(f.id)===String(c.fichaId)):null;const img=document.getElementById('fpImg'),noImg=document.getElementById('fpNoImg');if(f&&f.img){img.src=f.img;img.style.display='block';noImg.style.display='none';}else{img.style.display='none';noImg.style.display='block';}openM('mFichaPopup');}
+function openFichaFromCreature(cid){
+  const camp=AC();const c=camp.creatures.find(c=>c.id===cid);if(!c)return;
+  // check if creature name matches a personagem
+  const pj=(camp.personagens||[]).find(p=>p.name===c.name);
+  if(pj){openGenPopup(pj.name,pj.img||null);return;}
+  // otherwise show linked ficha
+  document.getElementById('fpName').textContent=c.name;
+  const f=c.fichaId?camp.fichas.find(f=>String(f.id)===String(c.fichaId)):null;
+  const img=document.getElementById('fpImg'),noImg=document.getElementById('fpNoImg');
+  if(f&&f.img){img.src=f.img;img.style.display='block';noImg.style.display='none';}
+  else{img.style.display='none';noImg.style.display='block';}
+  openM('mFichaPopup');
+}
 function openEditCreature(id){const camp=AC();const c=camp.creatures.find(c=>c.id===id);if(!c)return;document.getElementById('eCrId').value=id;document.getElementById('eCrNome').value=c.name;document.getElementById('eCrInit').value=c.init;document.getElementById('eCrHp').value=c.hp;document.getElementById('eCrHpMax').value=c.hpMax;document.getElementById('eCrAc').value=c.ac||'';const s=document.getElementById('eCrFicha');s.innerHTML='<option value="">— nenhuma —</option>'+camp.fichas.map(f=>`<option value="${f.id}"${String(c.fichaId)===String(f.id)?' selected':''}>${f.name}</option>`).join('');openM('mEditCreature');}
 function saveEditCreature(){const id=parseInt(document.getElementById('eCrId').value);const camp=AC();const c=camp.creatures.find(c=>c.id===id);if(!c)return;c.name=document.getElementById('eCrNome').value.trim()||c.name;const ni=parseInt(document.getElementById('eCrInit').value);if(!isNaN(ni)){c.init=ni;c.initReal=ni;}c.hp=parseInt(document.getElementById('eCrHp').value);c.hpMax=parseInt(document.getElementById('eCrHpMax').value)||c.hpMax;c.ac=parseInt(document.getElementById('eCrAc').value)||null;c.fichaId=document.getElementById('eCrFicha').value;c.dead=c.hp<=0;camp.creatures.sort((a,b)=>(b.initReal||b.init)-(a.initReal||a.init));closeM('mEditCreature');persist();renderCreatures();}
 
@@ -791,8 +813,97 @@ function fDragStart(e,id){fDragSrc=id;e.currentTarget.classList.add('dragging');
 function fDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
 function fDrop(e,tid){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(fDragSrc===tid)return;const fichas=AC().fichas;const si=fichas.findIndex(x=>x.id===fDragSrc),ti=fichas.findIndex(x=>x.id===tid);if(si<0||ti<0)return;const[item]=fichas.splice(si,1);fichas.splice(ti,0,item);document.querySelectorAll('#fichasGrid .fCard').forEach(el=>el.classList.remove('dragging'));persist();renderFichas();}
 
-// ===== PERSONAGENS =====
-function refreshAttuneSelects(...ids){const itens=(AC().itens||[]).filter(it=>it.attune==='yes');const opts='<option value="">— nenhum —</option>'+itens.map(it=>`<option value="${it.name}">${it.name}${it.raridade?' ('+it.raridade+')':''}</option>`).join('');ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});}
+// ===== ATTUNE ROWS =====
+// atMode[prefix][slot] = 'link' | 'manual'
+const atMode={};
+
+function buildAtRows(prefix, currentVals){
+  // currentVals: array of up to 3 strings (item names or manual text)
+  if(!atMode[prefix])atMode[prefix]=['link','link','link'];
+  for(let i=0;i<3;i++){
+    const rowEl=document.getElementById(prefix+'_at_row_'+i);
+    if(!rowEl)continue;
+    const mode=atMode[prefix][i];
+    const val=currentVals&&currentVals[i]?currentVals[i]:'';
+    // detect if saved val matches a magic item name
+    const matchesItem=!!(AC().itens||[]).find(it=>it.attune==='yes'&&it.name===val);
+    const effectiveMode=val&&!matchesItem?'manual':mode;
+    atMode[prefix][i]=effectiveMode;
+    rowEl.innerHTML=buildAtRow(prefix,i,effectiveMode,val,currentVals);
+  }
+}
+
+function buildAtRow(prefix,i,mode,val,allVals){
+  const usedItems=getUsedAttunedItems(prefix,allVals,i);
+  const availItems=(AC().itens||[]).filter(it=>it.attune==='yes'&&!usedItems.includes(it.name));
+  const btnLabel=mode==='link'?'✏ Manual':'🔗 Vincular';
+  const inputStyle='flex:1;font-family:var(--fB);font-size:.88rem;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;width:100%';
+  const btnStyle='font-family:var(--fN);font-size:.68rem;padding:.25rem .45rem;border:1px solid var(--border);border-radius:3px;background:var(--bg2);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0';
+  if(mode==='link'){
+    const opts='<option value="">— nenhum —</option>'+availItems.map(it=>`<option value="${it.name}"${val===it.name?' selected':''}>${it.name}${it.raridade?' ('+it.raridade+')':''}</option>`).join('');
+    return `<select id="${prefix}_at${i+1}" onchange="onAtChange('${prefix}',${i})" style="${inputStyle}">${opts}</select><button style="${btnStyle}" onclick="toggleAtMode('${prefix}',${i})">${btnLabel}</button>`;
+  } else {
+    return `<input type="text" id="${prefix}_at${i+1}" value="${val||''}" placeholder="Nome do item (manual)" style="${inputStyle}"><button style="${btnStyle}" onclick="toggleAtMode('${prefix}',${i})">${btnLabel}</button>`;
+  }
+}
+
+function getUsedAttunedItems(prefix,allVals,excludeSlot){
+  // items used by OTHER personagens
+  const thisPjId=prefix==='pj'?null:parseInt(document.getElementById('epj_id')?.value||0);
+  const usedByOthers=(AC().personagens||[])
+    .filter(p=>p.id!==thisPjId)
+    .flatMap(p=>p.attunados||[])
+    .filter(n=>(AC().itens||[]).find(it=>it.name===n&&it.attune==='yes'));
+  // items used in OTHER slots of this personagem
+  const usedInOtherSlots=[];
+  for(let s=0;s<3;s++){
+    if(s===excludeSlot)continue;
+    const el=document.getElementById(prefix+'_at'+(s+1));
+    const v=el?el.value:'';
+    if(v&&(AC().itens||[]).find(it=>it.name===v&&it.attune==='yes'))usedInOtherSlots.push(v);
+  }
+  return [...new Set([...usedByOthers,...usedInOtherSlots])];
+}
+
+function toggleAtMode(prefix,i){
+  if(!atMode[prefix])atMode[prefix]=['link','link','link'];
+  atMode[prefix][i]=atMode[prefix][i]==='link'?'manual':'link';
+  const allVals=getAtVals(prefix);
+  allVals[i]='';
+  buildAtRows(prefix,allVals);
+}
+
+function onAtChange(prefix,i){
+  const allVals=getAtVals(prefix);
+  buildAtRows(prefix,allVals);
+}
+
+function getAtVals(prefix){
+  return [1,2,3].map(n=>{
+    const el=document.getElementById(prefix+'_at'+n);
+    return el?el.value.trim():'';
+  });
+}
+
+// ===== GENERIC POPUP (item or personagem image) =====
+function openGenPopup(name, img){
+  document.getElementById('mGenPopupName').textContent=name;
+  const imgEl=document.getElementById('mGenPopupImg');
+  const noImgEl=document.getElementById('mGenPopupNoImg');
+  if(img){imgEl.src=img;imgEl.style.display='block';noImgEl.style.display='none';}
+  else{imgEl.style.display='none';noImgEl.style.display='block';}
+  openM('mGenPopup');
+}
+
+function openItemPopupByName(name){
+  const it=(AC().itens||[]).find(it=>it.name===name);
+  if(it)openGenPopup(it.name,it.img||null);
+}
+
+function openPJPopupByName(name){
+  const p=(AC().personagens||[]).find(p=>p.name===name);
+  if(p)openGenPopup(p.name,p.img||null);
+}
 function showPjForm(){document.getElementById('pjForm').style.display='block';document.getElementById('btnShowPjForm').style.display='none';refreshAttuneSelects('pj_at1','pj_at2','pj_at3');}
 function hidePjForm(){document.getElementById('pjForm').style.display='none';document.getElementById('btnShowPjForm').style.display='inline-block';}
 function addPJ(){
@@ -807,7 +918,20 @@ function openEditPJ(id){const p=(AC().personagens||[]).find(p=>p.id===id);if(!p)
 function saveEditPJ(){const id=parseInt(document.getElementById('epj_id').value);const p=(AC().personagens||[]).find(p=>p.id===id);if(!p)return;const n=document.getElementById('epj_nome').value.trim();if(n)p.name=n;const h=parseInt(document.getElementById('epj_hp').value);if(h)p.hpMax=h;const a=parseInt(document.getElementById('epj_ac').value);if(a)p.ac=a;p.type=document.getElementById('epj_classe').value.trim()||null;p.pp=parseInt(document.getElementById('epj_pp').value)||null;p.cristais=parseInt(document.getElementById('epj_cristais').value)||0;p.attunados=[document.getElementById('epj_at1').value,document.getElementById('epj_at2').value,document.getElementById('epj_at3').value].filter(Boolean);p.bg=document.getElementById('epj_bg').value.trim()||null;const fi=document.getElementById('epj_img');const done=()=>{persist();renderPJs();refreshPJSelectInParty();closeM('mEditPJ');};if(fi&&fi.files&&fi.files[0]){const r=new FileReader();r.onload=e=>{p.img=e.target.result;done();};r.readAsDataURL(fi.files[0]);}else done();}
 function removePJ(id){if(!confirm('Remover?'))return;const camp=AC();camp.personagens=(camp.personagens||[]).filter(p=>p.id!==id);persist();renderPJs();refreshPJSelectInParty();}
 function openPJPopup(id){const p=(AC().personagens||[]).find(p=>p.id===id);if(!p)return;document.getElementById('pjPopName').textContent=p.name;const img=document.getElementById('pjPopImg'),noImg=document.getElementById('pjPopNoImg'),bgEl=document.getElementById('pjPopBg');if(p.img){img.src=p.img;img.style.display='block';noImg.style.display='none';}else{img.style.display='none';noImg.style.display='block';}if(p.bg){bgEl.textContent=p.bg;bgEl.style.display='flex';}else bgEl.style.display='none';openM('mPJPopup');}
-function renderPJDash(){const pjs=AC().personagens||[];const el=document.getElementById('pjDash');if(!pjs.length){el.style.display='none';return;}el.style.display='block';const byPP=[...pjs].filter(p=>p.pp!=null).sort((a,b)=>b.pp-a.pp);const byCr=[...pjs].filter(p=>p.cristais>0).sort((a,b)=>b.cristais-a.cristais);const withAt=pjs.filter(p=>p.attunados&&p.attunados.length>0);const row=(n,v)=>`<div class="dbRow"><span>${n}</span><span>${v}</span></div>`;const empty='<span style="font-family:var(--fB);font-size:.82rem;color:var(--muted);font-style:italic">—</span>';el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.7rem"><div class="dbPanel"><div class="dbTitle">👁 Passive Perception</div>${byPP.length?byPP.map(p=>row(p.name,p.pp)).join(''):empty}</div><div class="dbPanel"><div class="dbTitle">💎 Cristais</div>${byCr.length?byCr.map(p=>row(p.name,p.cristais)).join(''):empty}</div><div class="dbPanel"><div class="dbTitle">⚡ Itens Attunados</div>${withAt.length?withAt.map(p=>`<div style="margin-bottom:.35rem"><div style="font-family:var(--fH);font-weight:600;font-size:.82rem;color:var(--muted)">${p.name}</div>${p.attunados.map(it=>`<div style="font-family:var(--fB);font-size:.85rem;padding:.1rem 0 .1rem .6rem;border-left:2px solid var(--border)">• ${it}</div>`).join('')}</div>`).join(''):empty}</div></div>`;}
+function renderPJDash(){
+  const pjs=AC().personagens||[];const el=document.getElementById('pjDash');
+  if(!pjs.length){el.style.display='none';return;}el.style.display='block';
+  const byPP=[...pjs].filter(p=>p.pp!=null).sort((a,b)=>b.pp-a.pp);
+  const byCr=[...pjs].filter(p=>p.cristais>0).sort((a,b)=>b.cristais-a.cristais);
+  const withAt=pjs.filter(p=>p.attunados&&p.attunados.length>0);
+  const row=(n,v)=>`<div class="dbRow"><span>${n}</span><span>${v}</span></div>`;
+  const empty='<span style="font-family:var(--fB);font-size:.82rem;color:var(--muted);font-style:italic">—</span>';
+  el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.7rem">
+    <div class="dbPanel"><div class="dbTitle">👁 Passive Perception</div>${byPP.length?byPP.map(p=>row(p.name,p.pp)).join(''):empty}</div>
+    <div class="dbPanel"><div class="dbTitle">💎 Cristais</div>${byCr.length?byCr.map(p=>row(p.name,p.cristais)).join(''):empty}</div>
+    <div class="dbPanel"><div class="dbTitle">⚡ Itens Attunados</div>${withAt.length?withAt.map(p=>`<div style="margin-bottom:.35rem"><div style="font-family:var(--fH);font-weight:600;font-size:.82rem;color:var(--muted)">${p.name}</div>${p.attunados.map(it=>`<div style="font-family:var(--fB);font-size:.85rem;padding:.1rem 0 .1rem .6rem;border-left:2px solid var(--border);cursor:pointer;color:var(--red)" onclick="openItemPopupByName('${it.replace(/'/g,"\\'")}')">• ${it}</div>`).join('')}</div>`).join(''):empty}</div>
+  </div>`;
+}
 function renderPJs(){
   renderPJDash();const el=document.getElementById('pjGrid');const pjs=AC().personagens||[];
   if(!pjs.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum personagem ainda.</div>';return;}
@@ -817,7 +941,7 @@ function renderPJs(){
       <div class="fName">${p.name}</div>
       ${p.type?`<div class="tBadge">${p.type}</div>`:''}
       <div class="fMeta">${[p.hpMax?'HP:'+p.hpMax:'',p.ac?'AC:'+p.ac:'',p.pp?'PP:'+p.pp:'',p.cristais?'💎'+p.cristais:''].filter(Boolean).join(' · ')}</div>
-      ${p.attunados&&p.attunados.length?`<div style="font-family:var(--fN);font-size:.68rem;color:var(--muted);margin-bottom:.3rem">⚡ ${p.attunados.join(' · ')}</div>`:''}
+      ${p.attunados&&p.attunados.length?`<div style="font-family:var(--fN);font-size:.68rem;color:var(--muted);margin-bottom:.3rem">${p.attunados.map(it=>`<span style="cursor:pointer;color:var(--red)" onclick="openItemPopupByName('${it.replace(/'/g,"\\'")}')">⚡ ${it}</span>`).join(' · ')}</div>`:''}
       ${p.bg?`<div style="font-family:var(--fB);font-size:.75rem;color:var(--muted);font-style:italic;margin-bottom:.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${p.bg}</div>`:''}
       <button class="btn btnOut sm" style="width:100%;margin-top:.3rem" onclick="openEditPJ(${p.id})">✏ Editar</button>
       <button class="btn btnDng sm" style="width:100%;margin-top:.3rem" onclick="removePJ(${p.id})">✕ Remover</button>
