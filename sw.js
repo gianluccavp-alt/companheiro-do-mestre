@@ -1,4 +1,4 @@
-const CACHE = 'companheiro-v2';
+const CACHE = 'companheiro-v4';
 const FILES = [
   './index.html',
   './manifest.json',
