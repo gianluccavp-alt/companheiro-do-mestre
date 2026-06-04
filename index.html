@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Companheiro do Mestre</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#8b0000">
-<link rel="apple-touch-icon" href="./icon-192.png">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -30,7 +27,6 @@ body{background:var(--bg);font-family:var(--fB);color:var(--ink);min-height:100v
 .campBar{display:flex;align-items:center;justify-content:center;gap:.4rem;margin:.5rem auto 0;flex-wrap:wrap;padding:.45rem .8rem;background:var(--bg3);border:1.5px solid var(--border);border-radius:4px;max-width:620px}
 .campLabel{font-family:var(--fH);font-size:.78rem;font-weight:600;color:var(--muted);white-space:nowrap}
 .campSel{font-family:var(--fH);font-size:.88rem;background:var(--light);border:1px solid var(--border);color:var(--red);padding:.28rem .6rem;border-radius:3px;flex:1;min-width:120px;max-width:220px;cursor:pointer}
-.campSel:focus{outline:none;border-color:var(--red)}
 .hActions{display:flex;justify-content:center;gap:.4rem;margin-top:.55rem;flex-wrap:wrap}
 .hStripe{height:5px;background:repeating-linear-gradient(90deg,var(--red) 0,var(--red) 8px,transparent 8px,transparent 12px);margin-top:.8rem;opacity:.55}
 .nav{display:flex;justify-content:center;gap:.4rem;padding:.55rem;flex-wrap:wrap;background:var(--red);border-bottom:3px solid var(--border2)}
@@ -85,8 +81,7 @@ textarea{resize:vertical;min-height:80px}
 .sPill.conc{background:#ddeeff;border-color:#6699cc;color:#1a3a6b}
 .sPill.other{background:#fde8e8;border-color:#c88;color:var(--red)}
 .sPill:hover{opacity:.75}
-.sPill .tip{display:none;position:fixed;background:#1a1008;border:1px solid var(--red);border-radius:3px;padding:.5rem .7rem;font-family:var(--fB);font-size:.78rem;color:#f5efe0;max-width:260px;line-height:1.55;z-index:9999;pointer-events:none;box-shadow:2px 4px 10px rgba(0,0,0,.5)}
-.sPill:hover .tip{display:block}
+.tipbox{display:none;position:fixed;background:#1a1008;border:1px solid var(--red);border-radius:3px;padding:.5rem .7rem;font-family:var(--fB);font-size:.78rem;color:#f5efe0;max-width:260px;line-height:1.55;z-index:9999;pointer-events:none;box-shadow:2px 4px 10px rgba(0,0,0,.5)}
 .dEntry{background:var(--light);border:1px solid var(--border);border-left:4px solid var(--red);border-radius:2px;padding:.82rem 1rem;margin-bottom:.75rem;box-shadow:1px 1px 3px rgba(0,0,0,.05);user-select:none}
 .dEntry.drag-over{border-top:2px solid var(--red)}
 .dEntry .hl{background:#ffe066;border-radius:2px}
@@ -128,9 +123,16 @@ input[type=file]{display:none}
 .dbRow{display:flex;justify-content:space-between;align-items:center;padding:.18rem 0;border-bottom:1px dashed var(--bg3)}
 .dbRow span:first-child{font-family:var(--fB);font-size:.88rem}
 .dbRow span:last-child{font-family:var(--fN);font-weight:700;font-size:.95rem}
+/* attune rows */
+.atRow{display:flex;gap:.4rem;align-items:center;margin-bottom:.4rem}
+.atRow select,.atRow input[type=text]{flex:1;font-size:.88rem}
+.atToggle{font-family:var(--fN);font-size:.68rem;padding:.25rem .45rem;border:1px solid var(--border);border-radius:3px;background:var(--bg2);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.atToggle:hover{border-color:var(--red);color:var(--red)}
 </style>
 </head>
 <body>
+
+<div id="globalTip" class="tipbox"></div>
 
 <div class="header">
   <div class="d20">⬡ ⬡ ⬡</div>
@@ -224,23 +226,7 @@ input[type=file]{display:none}
       </div>
       <div style="margin-bottom:.7rem">
         <label style="display:block;margin-bottom:.35rem">Itens Attunados <span style="font-family:var(--fN);font-size:.68rem;color:var(--muted)">(opcionais, máx. 3)</span></label>
-        <div style="display:flex;flex-direction:column;gap:.4rem">
-          <div style="display:flex;gap:.4rem;align-items:center">
-            <select id="pj_at1" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem"><option value="">— Item 1 (vincular) —</option></select>
-            <span style="font-family:var(--fN);font-size:.75rem;color:var(--muted)">ou</span>
-            <input type="text" id="pj_at1m" placeholder="Item 1 manual" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem">
-          </div>
-          <div style="display:flex;gap:.4rem;align-items:center">
-            <select id="pj_at2" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem"><option value="">— Item 2 (vincular) —</option></select>
-            <span style="font-family:var(--fN);font-size:.75rem;color:var(--muted)">ou</span>
-            <input type="text" id="pj_at2m" placeholder="Item 2 manual" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem">
-          </div>
-          <div style="display:flex;gap:.4rem;align-items:center">
-            <select id="pj_at3" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem"><option value="">— Item 3 (vincular) —</option></select>
-            <span style="font-family:var(--fN);font-size:.75rem;color:var(--muted)">ou</span>
-            <input type="text" id="pj_at3m" placeholder="Item 3 manual" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem">
-          </div>
-        </div>
+        <div id="pj_atRows"></div>
       </div>
       <label class="ulabel" for="pj_img">⬡ Clique para carregar imagem</label>
       <input type="file" id="pj_img" accept="image/*">
@@ -265,7 +251,7 @@ input[type=file]{display:none}
       <div class="fGrp"><label>Nome</label><input type="text" id="it_nome" placeholder="Ex: Espada +1"></div>
       <div class="fGrp" style="max-width:140px"><label>Tipo</label><input type="text" id="it_tipo" placeholder="Ex: Arma, Armadura..."></div>
       <div class="fGrp" style="max-width:145px"><label>Raridade</label>
-        <select id="it_raridade"><option value="">— selecione —</option><option value="Uncommon">Uncommon</option><option value="Rare">Rare</option><option value="Very Rare">Very Rare</option><option value="Legendary">Legendary</option><option value="Artifact">Artifact</option></select>
+        <select id="it_raridade"><option value="">— selecione —</option><option>Uncommon</option><option>Rare</option><option>Very Rare</option><option>Legendary</option><option>Artifact</option></select>
       </div>
       <div class="fGrp" style="max-width:120px"><label>Attunamento</label>
         <select id="it_attune"><option value="no">Não</option><option value="yes">Sim</option></select>
@@ -278,7 +264,7 @@ input[type=file]{display:none}
   </div>
   <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.8rem;flex-wrap:wrap">
     <input type="text" id="itSearch" placeholder="⬡ Pesquisar itens..." oninput="renderItens()" style="flex:1;max-width:200px">
-    <select id="itRarFilter" onchange="renderItens()" style="font-family:var(--fH);font-size:.85rem;background:var(--light);border:1px solid var(--border);color:var(--ink);padding:.35rem .6rem;border-radius:3px;max-width:140px"><option value="">Todas Raridades</option><option value="Uncommon">Uncommon</option><option value="Rare">Rare</option><option value="Very Rare">Very Rare</option><option value="Legendary">Legendary</option><option value="Artifact">Artifact</option></select>
+    <select id="itRarFilter" onchange="renderItens()" style="font-family:var(--fH);font-size:.85rem;background:var(--light);border:1px solid var(--border);color:var(--ink);padding:.35rem .6rem;border-radius:3px;max-width:140px"><option value="">Todas Raridades</option><option>Uncommon</option><option>Rare</option><option>Very Rare</option><option>Legendary</option><option>Artifact</option></select>
     <select id="itTypeFilter" onchange="renderItens()" style="font-family:var(--fH);font-size:.85rem;background:var(--light);border:1px solid var(--border);color:var(--ink);padding:.35rem .6rem;border-radius:3px;max-width:140px"><option value="">Todos os Tipos</option></select>
     <select id="itSort" onchange="renderItens()" style="font-family:var(--fH);font-size:.85rem;background:var(--light);border:1px solid var(--border);color:var(--ink);padding:.35rem .6rem;border-radius:3px;max-width:155px"><option value="none">Sem ordenação</option><option value="type">Por Tipo</option><option value="rar_asc">Menor Raridade</option><option value="rar_desc">Maior Raridade</option></select>
     <span id="itCount" style="font-family:var(--fN);font-size:.78rem;color:var(--muted)"></span>
@@ -312,7 +298,7 @@ input[type=file]{display:none}
   <div id="diaryList"></div>
 </div>
 
-<!-- MODALS -->
+<!-- ===== MODALS ===== -->
 <div class="mOv" id="mHp"><div class="modal" style="text-align:center;min-width:240px">
   <button class="mClose" onclick="closeM('mHp')">✕</button>
   <h3 id="mHpTitle">Alterar HP</h3>
@@ -449,6 +435,7 @@ input[type=file]{display:none}
   <div style="text-align:right;margin-top:.8rem"><button class="btn btnRed" onclick="startNewCombat()">▶ Iniciar</button></div>
 </div></div>
 
+<!-- MODAL EDITAR PERSONAGEM — attune rows dinâmicos -->
 <div class="mOv" id="mEditPJ"><div class="modal" style="max-width:520px;width:90vw">
   <button class="mClose" onclick="closeM('mEditPJ')">✕</button><h3>Editar Personagem</h3>
   <input type="hidden" id="epj_id">
@@ -464,11 +451,7 @@ input[type=file]{display:none}
   </div>
   <div style="margin-bottom:.7rem">
     <label style="display:block;margin-bottom:.35rem">Itens Attunados <span style="font-family:var(--fN);font-size:.68rem;color:var(--muted)">(opcionais)</span></label>
-    <div class="fRow" style="margin-bottom:0">
-      <div class="fGrp"><select id="epj_at1"></select></div>
-      <div class="fGrp"><select id="epj_at2"></select></div>
-      <div class="fGrp"><select id="epj_at3"></select></div>
-    </div>
+    <div id="epj_atRows"></div>
   </div>
   <label class="ulabel" for="epj_img">⬡ Trocar imagem (opcional)</label>
   <input type="file" id="epj_img" accept="image/*">
@@ -476,16 +459,6 @@ input[type=file]{display:none}
   <div class="fGrp" style="margin-top:.7rem"><label>Background</label><textarea id="epj_bg" style="min-height:120px"></textarea></div>
   <div style="text-align:right;margin-top:.9rem"><button class="btn btnRed" onclick="saveEditPJ()">Salvar</button></div>
 </div></div>
-
-<!-- Generic image popup (item/personagem) -->
-<div class="mOv" id="mGenPopup" onclick="if(event.target===this)closeM('mGenPopup')">
-  <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:.7rem;max-width:92vw">
-    <button onclick="closeM('mGenPopup')" style="position:absolute;top:-2rem;right:0;background:transparent;border:none;color:#ccc;font-size:1.3rem;cursor:pointer">✕</button>
-    <p id="mGenPopupName" style="font-family:var(--fH);font-weight:700;font-size:1.1rem;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)"></p>
-    <img id="mGenPopupImg" style="max-width:90vw;max-height:80vh;object-fit:contain;border-radius:4px;border:2px solid var(--border2);display:none;box-shadow:0 4px 24px rgba(0,0,0,.5)" src="" alt="">
-    <div id="mGenPopupNoImg" style="display:none;background:var(--bg2);border:2px solid var(--border);border-radius:4px;padding:1.5rem 2.5rem;color:var(--muted);font-style:italic">Sem imagem</div>
-  </div>
-</div>
 
 <div class="mOv" id="mEditItem"><div class="modal" style="max-width:460px;width:90vw">
   <button class="mClose" onclick="closeM('mEditItem')">✕</button><h3>Editar Item</h3>
@@ -495,7 +468,7 @@ input[type=file]{display:none}
     <div class="fGrp" style="max-width:140px"><label>Tipo</label><input type="text" id="eItTipo"></div>
   </div>
   <div class="fRow">
-    <div class="fGrp"><label>Raridade</label><select id="eItRar"><option value="">— selecione —</option><option value="Uncommon">Uncommon</option><option value="Rare">Rare</option><option value="Very Rare">Very Rare</option><option value="Legendary">Legendary</option><option value="Artifact">Artifact</option></select></div>
+    <div class="fGrp"><label>Raridade</label><select id="eItRar"><option value="">— selecione —</option><option>Uncommon</option><option>Rare</option><option>Very Rare</option><option>Legendary</option><option>Artifact</option></select></div>
     <div class="fGrp" style="max-width:120px"><label>Attunamento</label><select id="eItAttune"><option value="no">Não</option><option value="yes">Sim</option></select></div>
   </div>
   <label class="ulabel" for="eItImg">⬡ Trocar imagem</label>
@@ -506,6 +479,7 @@ input[type=file]{display:none}
 </div></div>
 
 <script>
+// ===== CONSTANTS =====
 const CONDS=[
   {k:'Concentrating',l:'Concentrating',c:true,d:'Requires mental focus. Ends if you cast another concentration spell, take damage, or become incapacitated.'},
   {k:'Blinded',l:'Blinded',d:"Can't see; fail sight checks; disadvantage on attacks; attacks against you have advantage."},
@@ -528,16 +502,15 @@ const RAR_ORDER=['Uncommon','Rare','Very Rare','Legendary','Artifact'];
 const RAR_COLORS={Uncommon:'#1a6b2a',Rare:'#1a3a6b','Very Rare':'#5b2d8e',Legendary:'#b8860b',Artifact:'#8b0000'};
 const RAR_BG={Uncommon:'#e8f5e8',Rare:'#ddeeff','Very Rare':'#ede0ff',Legendary:'#fff3cd',Artifact:'#fde8e8'};
 
+// ===== STATE =====
 let campaigns=[], activeId=null, hpTgt=null, dDragSrc=null, fDragSrc=null, pjDragSrc=null, itDragSrc=null;
+let _db=null;
 
 // ===== MODALS =====
 function openM(id){document.getElementById(id).classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
 
 // ===== STORAGE =====
-// ===== STORAGE — IndexedDB + localStorage fallback =====
-let _db=null;
-
 function openDB(){
   return new Promise((res,rej)=>{
     if(_db){res(_db);return;}
@@ -547,50 +520,22 @@ function openDB(){
     req.onerror=e=>rej(e);
   });
 }
-function idbSet(key,val){
-  return openDB().then(db=>new Promise((res,rej)=>{
-    const tx=db.transaction('kv','readwrite');
-    tx.objectStore('kv').put(val,key);
-    tx.oncomplete=res;tx.onerror=rej;
-  }));
-}
-function idbGet(key){
-  return openDB().then(db=>new Promise((res,rej)=>{
-    const tx=db.transaction('kv','readonly');
-    const req=tx.objectStore('kv').get(key);
-    req.onsuccess=e=>res(e.target.result);
-    req.onerror=rej;
-  }));
-}
+function idbSet(key,val){return openDB().then(db=>new Promise((res,rej)=>{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(val,key);tx.oncomplete=res;tx.onerror=rej;}));}
+function idbGet(key){return openDB().then(db=>new Promise((res,rej)=>{const tx=db.transaction('kv','readonly');const req=tx.objectStore('kv').get(key);req.onsuccess=e=>res(e.target.result);req.onerror=rej;}));}
 
 function persist(){
   const data=JSON.stringify({campaigns,activeId});
-  // 1. IndexedDB (primary — survives PWA close)
-  idbSet('nc_data',data).catch(e=>console.error('IDB save failed:',e));
-  // 2. localStorage (backup)
+  idbSet('nc_data',data).catch(()=>{});
   try{localStorage.setItem('nc_data',data);}catch(e){}
-  // 3. window.storage (Claude sandbox)
   try{if(window.storage&&window.storage.set)window.storage.set('nc_data',data);}catch(e){}
 }
 
 async function loadStorage(){
-  // 1. IndexedDB
-  try{
-    const raw=await idbGet('nc_data');
-    if(raw){const d=JSON.parse(raw);if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;console.log('Loaded from IndexedDB');return;}}
-  }catch(e){console.error('IDB load failed:',e);}
-  // 2. localStorage
-  try{
-    const raw=localStorage.getItem('nc_data');
-    if(raw){const d=JSON.parse(raw);if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;console.log('Loaded from localStorage');return;}}
-  }catch(e){}
-  // 3. window.storage
-  try{
-    const r=await window.storage.get('nc_data');
-    if(r&&r.value){const d=JSON.parse(r.value);if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;console.log('Loaded from window.storage');return;}}
-  }catch(e){}
-  console.log('No saved data found.');
+  try{const raw=await idbGet('nc_data');if(raw){const d=JSON.parse(raw);if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;return;}}}catch(e){}
+  try{const raw=localStorage.getItem('nc_data');if(raw){const d=JSON.parse(raw);if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;return;}}}catch(e){}
+  try{const r=await window.storage.get('nc_data');if(r&&r.value){const d=JSON.parse(r.value);if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;return;}}}catch(e){}
 }
+
 function ensureDefaults(){
   if(!campaigns.length){const id='c'+Date.now();campaigns=[{id,name:'Campanha Principal',diary:[],fichas:[],party:[],creatures:[],personagens:[],itens:[],currentTurn:-1}];activeId=id;}
   if(!activeId||!campaigns.find(c=>c.id===activeId))activeId=campaigns[0].id;
@@ -600,6 +545,7 @@ function ensureDefaults(){
     if(!c.itens)c.itens=[];if(c.currentTurn===undefined)c.currentTurn=-1;
   });
 }
+
 function AC(){
   const camp=campaigns.find(c=>c.id===activeId);
   if(!camp&&campaigns.length){activeId=campaigns[0].id;return campaigns[0];}
@@ -608,7 +554,7 @@ function AC(){
 
 // ===== EXPORT/IMPORT =====
 function exportData(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({campaigns,activeId},null,2));a.download='companheiro_backup.json';a.click();}
-function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.campaigns){campaigns=d.campaigns;activeId=d.activeId||d.campaigns[0].id;}ensureDefaults();persist();renderAll();alert('Importado!');}catch{alert('Arquivo inválido.');}};r.readAsText(f);e.target.value='';}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.campaigns){campaigns=d.campaigns;activeId=d.activeId||d.campaigns[0].id;}}catch{alert('Arquivo inválido.');return;}ensureDefaults();persist();renderAll();alert('Importado!');};r.readAsText(f);e.target.value='';}
 
 // ===== CAMPAIGN =====
 function renderCampSel(){const s=document.getElementById('campSel');s.innerHTML=campaigns.map(c=>`<option value="${c.id}"${c.id===activeId?' selected':''}>${c.name}</option>`).join('');}
@@ -638,12 +584,7 @@ function addCreature(){
   document.getElementById('cFichaLink').value='';
   AC().currentTurn=-1;persist();renderCreatures();
 }
-function moveCreature(id,dir){
-  const camp=AC();const idx=camp.creatures.findIndex(c=>c.id===id);const newIdx=idx+dir;
-  if(newIdx<0||newIdx>=camp.creatures.length)return;
-  [camp.creatures[idx],camp.creatures[newIdx]]=[camp.creatures[newIdx],camp.creatures[idx]];
-  persist();renderCreatures();
-}
+function moveCreature(id,dir){const camp=AC();const idx=camp.creatures.findIndex(c=>c.id===id);const newIdx=idx+dir;if(newIdx<0||newIdx>=camp.creatures.length)return;[camp.creatures[idx],camp.creatures[newIdx]]=[camp.creatures[newIdx],camp.creatures[idx]];persist();renderCreatures();}
 function renderCreatures(){
   const camp=AC();const el=document.getElementById('creatureList');
   if(!camp.creatures.length){el.innerHTML='<div class="empty">Nenhuma criatura.</div>';document.getElementById('tBanner').style.display='none';return;}
@@ -668,7 +609,7 @@ function renderCreatures(){
     const fn=c.fichaId?camp.fichas.find(f=>String(f.id)===String(c.fichaId))?.name:'';
     const conds=c.conditions||[];
     const checks=CONDS.map(cd=>`<label class="sdOpt"><input type="checkbox"${conds.includes(cd.k)?' checked':''} onchange="toggleCond(${c.id},'${cd.k}',this.checked)"><span>${cd.l}</span></label>`).join('');
-    const pills=conds.map(k=>{const cd=CONDS.find(x=>x.k===k);return cd?`<span class="sPill ${cd.c?'conc':'other'}" onclick="removeCond(${c.id},'${k}')" onmouseenter="posTip(event,this)" onmouseleave="hideTip(this)">${cd.l}<span class="tip">${cd.d}</span></span>`:''}).join('');
+    const pills=conds.map(k=>{const cd=CONDS.find(x=>x.k===k);return cd?`<span class="sPill ${cd.c?'conc':'other'}" onclick="removeCond(${c.id},'${k}')" onmouseenter="showTip(event,'${cd.d.replace(/'/g,"&#39;")}')" onmouseleave="hideTip()">${cd.l}</span>`:''}).join('');
     return`<div class="cRow ${act} ${dead}">
       <div class="iBadge" style="background:${bg};border-color:${bd};color:${tc}">${c.init}</div>
       <div style="flex:1;min-width:70px">
@@ -689,18 +630,18 @@ function renderCreatures(){
       </div>
       ${i===camp.currentTurn?'<div class="tInd">⬡ Agindo</div>':''}
       <button class="btn sm btnOut" onclick="openEditCreature(${c.id})">✏</button>
-      <button class="btn sm btnOut" style="padding:.24rem .4rem" onclick="moveCreature(${c.id},-1)" title="Mover para cima">↑</button>
-      <button class="btn sm btnOut" style="padding:.24rem .4rem" onclick="moveCreature(${c.id},1)" title="Mover para baixo">↓</button>
+      <button class="btn sm btnOut" style="padding:.24rem .4rem" onclick="moveCreature(${c.id},-1)" title="Subir">↑</button>
+      <button class="btn sm btnOut" style="padding:.24rem .4rem" onclick="moveCreature(${c.id},1)" title="Descer">↓</button>
       <button class="btn sm btnDng" onclick="removeCreature(${c.id})">✕</button>
     </div>`;
   }).join('');
 }
+function showTip(e,txt){const t=document.getElementById('globalTip');t.textContent=txt;t.style.display='block';t.style.top=(e.clientY+12)+'px';t.style.left=Math.min(e.clientX,window.innerWidth-280)+'px';}
+function hideTip(){document.getElementById('globalTip').style.display='none';}
 function toggleSD(id){document.querySelectorAll('.sdMenu').forEach(d=>{if(d.id!=='sd_'+id)d.classList.remove('open')});document.getElementById('sd_'+id)?.classList.toggle('open');}
 document.addEventListener('click',e=>{if(!e.target.closest('.sdWrap'))document.querySelectorAll('.sdMenu').forEach(d=>d.classList.remove('open'));});
 function toggleCond(cid,k,on){const c=AC().creatures.find(c=>c.id===cid);if(!c)return;if(!c.conditions)c.conditions=[];if(on){if(!c.conditions.includes(k))c.conditions.push(k);}else c.conditions=c.conditions.filter(x=>x!==k);persist();renderCreatures();setTimeout(()=>document.getElementById('sd_'+cid)?.classList.add('open'),10);}
 function removeCond(cid,k){const c=AC().creatures.find(c=>c.id===cid);if(!c)return;c.conditions=(c.conditions||[]).filter(x=>x!==k);persist();renderCreatures();}
-function posTip(e,el){const t=el.querySelector('.tip');if(!t)return;const r=el.getBoundingClientRect();t.style.top=(r.bottom+6)+'px';t.style.left=Math.min(r.left,window.innerWidth-280)+'px';}
-function hideTip(el){const t=el.querySelector('.tip');if(t){t.style.top='';t.style.left='';}}
 function openHpM(id){hpTgt={id};const c=AC().creatures.find(c=>c.id===id);document.getElementById('mHpTitle').textContent='Alterar HP — '+c.name;document.getElementById('mHpAmt').value='';openM('mHp');setTimeout(()=>document.getElementById('mHpAmt').focus(),80);}
 function applyHp(type){hpTgt.lastType=type;const amt=parseInt(document.getElementById('mHpAmt').value)||0;if(amt<=0)return;const c=AC().creatures.find(c=>c.id===hpTgt.id);if(!c)return;if(type==='dmg'){c.hp=Math.max(0,c.hp-amt);if(c.hp===0)c.dead=true;}else{c.hp+=amt;if(c.hp>0)c.dead=false;}closeM('mHp');persist();renderCreatures();}
 function nextTurn(){const camp=AC();if(!camp.creatures.length)return;const alive=camp.creatures.filter(c=>!c.dead);if(!alive.length)return;if(camp.currentTurn===-1)camp.currentTurn=0;else{let n=camp.currentTurn+1;while(n<camp.creatures.length&&camp.creatures[n].dead)n++;if(n>=camp.creatures.length){n=0;while(n<camp.creatures.length&&camp.creatures[n].dead)n++;}camp.currentTurn=n;}persist();renderCreatures();}
@@ -709,10 +650,8 @@ function removeCreature(id){const camp=AC();camp.creatures=camp.creatures.filter
 function refreshFichaSelect(){const s=document.getElementById('cFichaLink');s.innerHTML='<option value="">— nenhuma —</option>'+AC().fichas.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');}
 function openFichaFromCreature(cid){
   const camp=AC();const c=camp.creatures.find(c=>c.id===cid);if(!c)return;
-  // check if creature name matches a personagem
   const pj=(camp.personagens||[]).find(p=>p.name===c.name);
   if(pj){openGenPopup(pj.name,pj.img||null);return;}
-  // otherwise show linked ficha
   document.getElementById('fpName').textContent=c.name;
   const f=c.fichaId?camp.fichas.find(f=>String(f.id)===String(c.fichaId)):null;
   const img=document.getElementById('fpImg'),noImg=document.getElementById('fpNoImg');
@@ -825,80 +764,119 @@ function fDragStart(e,id){fDragSrc=id;e.currentTarget.classList.add('dragging');
 function fDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
 function fDrop(e,tid){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(fDragSrc===tid)return;const fichas=AC().fichas;const si=fichas.findIndex(x=>x.id===fDragSrc),ti=fichas.findIndex(x=>x.id===tid);if(si<0||ti<0)return;const[item]=fichas.splice(si,1);fichas.splice(ti,0,item);document.querySelectorAll('#fichasGrid .fCard').forEach(el=>el.classList.remove('dragging'));persist();renderFichas();}
 
-// ===== ATTUNE ROWS =====
-// atMode[prefix][slot] = 'link' | 'manual'
-const atMode={};
+// ===== ATTUNEMENT SYSTEM =====
+// Modes per container: { 'pj_atRows': ['link','link','link'], 'epj_atRows': [...] }
+const atModes={};
 
-function buildAtRows(prefix, currentVals){
-  // currentVals: array of up to 3 strings (item names or manual text)
-  if(!atMode[prefix])atMode[prefix]=['link','link','link'];
-  for(let i=0;i<3;i++){
-    const rowEl=document.getElementById(prefix+'_at_row_'+i);
-    if(!rowEl)continue;
-    const mode=atMode[prefix][i];
-    const val=currentVals&&currentVals[i]?currentVals[i]:'';
-    // detect if saved val matches a magic item name
-    const matchesItem=!!(AC().itens||[]).find(it=>it.attune==='yes'&&it.name===val);
-    const effectiveMode=val&&!matchesItem?'manual':mode;
-    atMode[prefix][i]=effectiveMode;
-    rowEl.innerHTML=buildAtRow(prefix,i,effectiveMode,val,currentVals);
-  }
+function getAttuneItems(){
+  return (AC().itens||[]).filter(it=>it.attune==='yes');
 }
 
-function buildAtRow(prefix,i,mode,val,allVals){
-  const usedItems=getUsedAttunedItems(prefix,allVals,i);
-  const availItems=(AC().itens||[]).filter(it=>it.attune==='yes'&&!usedItems.includes(it.name));
-  const btnLabel=mode==='link'?'✏ Manual':'🔗 Vincular';
-  const inputStyle='flex:1;font-family:var(--fB);font-size:.88rem;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;width:100%';
-  const btnStyle='font-family:var(--fN);font-size:.68rem;padding:.25rem .45rem;border:1px solid var(--border);border-radius:3px;background:var(--bg2);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0';
-  if(mode==='link'){
-    const opts='<option value="">— nenhum —</option>'+availItems.map(it=>`<option value="${it.name}"${val===it.name?' selected':''}>${it.name}${it.raridade?' ('+it.raridade+')':''}</option>`).join('');
-    return `<select id="${prefix}_at${i+1}" onchange="onAtChange('${prefix}',${i})" style="${inputStyle}">${opts}</select><button style="${btnStyle}" onclick="toggleAtMode('${prefix}',${i})">${btnLabel}</button>`;
-  } else {
-    return `<input type="text" id="${prefix}_at${i+1}" value="${val||''}" placeholder="Nome do item (manual)" style="${inputStyle}"><button style="${btnStyle}" onclick="toggleAtMode('${prefix}',${i})">${btnLabel}</button>`;
-  }
-}
-
-function getUsedAttunedItems(prefix,allVals,excludeSlot){
-  // items used by OTHER personagens
-  const thisPjId=prefix==='pj'?null:parseInt(document.getElementById('epj_id')?.value||0);
-  const usedByOthers=(AC().personagens||[])
-    .filter(p=>p.id!==thisPjId)
-    .flatMap(p=>p.attunados||[])
-    .filter(n=>(AC().itens||[]).find(it=>it.name===n&&it.attune==='yes'));
-  // items used in OTHER slots of this personagem
-  const usedInOtherSlots=[];
-  for(let s=0;s<3;s++){
-    if(s===excludeSlot)continue;
-    const el=document.getElementById(prefix+'_at'+(s+1));
-    const v=el?el.value:'';
-    if(v&&(AC().itens||[]).find(it=>it.name===v&&it.attune==='yes'))usedInOtherSlots.push(v);
-  }
-  return [...new Set([...usedByOthers,...usedInOtherSlots])];
-}
-
-function toggleAtMode(prefix,i){
-  if(!atMode[prefix])atMode[prefix]=['link','link','link'];
-  atMode[prefix][i]=atMode[prefix][i]==='link'?'manual':'link';
-  const allVals=getAtVals(prefix);
-  allVals[i]='';
-  buildAtRows(prefix,allVals);
-}
-
-function onAtChange(prefix,i){
-  const allVals=getAtVals(prefix);
-  buildAtRows(prefix,allVals);
-}
-
-function getAtVals(prefix){
-  return [1,2,3].map(n=>{
-    const el=document.getElementById(prefix+'_at'+n);
-    return el?el.value.trim():'';
+function getOtherPJUsedItems(containerId, excludePjId){
+  // items used by other personagens (not the one being edited)
+  const all=AC().personagens||[];
+  const used=[];
+  all.forEach(p=>{
+    if(excludePjId && p.id===excludePjId) return;
+    (p.attunados||[]).forEach(name=>{
+      if(getAttuneItems().find(it=>it.name===name)) used.push(name);
+    });
   });
+  return [...new Set(used)];
 }
 
-// ===== GENERIC POPUP (item or personagem image) =====
-function openGenPopup(name, img){
+function getSlotVals(containerId){
+  const vals=[];
+  for(let i=0;i<3;i++){
+    const el=document.getElementById(containerId+'_slot'+i);
+    vals.push(el ? el.value.trim() : '');
+  }
+  return vals;
+}
+
+function buildAttuneRows(containerId, savedVals, excludePjId){
+  const container=document.getElementById(containerId);
+  if(!container) return;
+  if(!atModes[containerId]) atModes[containerId]=['link','link','link'];
+  const modes=atModes[containerId];
+  const atItems=getAttuneItems();
+  const otherUsed=getOtherPJUsedItems(containerId, excludePjId);
+
+  // detect mode from saved values
+  if(savedVals){
+    savedVals.forEach((val,i)=>{
+      if(val && !atItems.find(it=>it.name===val)){
+        modes[i]='manual';
+      }
+    });
+  }
+
+  let html='';
+  for(let i=0;i<3;i++){
+    const mode=modes[i];
+    const val=savedVals && savedVals[i] ? savedVals[i] : '';
+    // collect items used in other slots of THIS container
+    const usedInOtherSlots=[];
+    for(let s=0;s<3;s++){
+      if(s===i) continue;
+      const el=document.getElementById(containerId+'_slot'+s);
+      if(el){
+        const v=el.value.trim();
+        if(v && atItems.find(it=>it.name===v)) usedInOtherSlots.push(v);
+      }
+    }
+    const blocked=[...otherUsed,...usedInOtherSlots];
+    const available=atItems.filter(it=>!blocked.includes(it.name)||(val&&it.name===val));
+
+    const baseStyle='flex:1;font-family:var(--fB);font-size:.88rem;background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;';
+    const toggleLabel=mode==='link'?'✏ Manual':'🔗 Vincular';
+
+    if(mode==='link'){
+      const opts='<option value="">— nenhum —</option>'+available.map(it=>`<option value="${it.name}"${it.name===val?' selected':''}>${it.name}${it.raridade?' ('+it.raridade+')':''}</option>`).join('');
+      html+=`<div class="atRow">
+        <select id="${containerId}_slot${i}" style="${baseStyle}" onchange="onAtSlotChange('${containerId}',${excludePjId||0})">${opts}</select>
+        <button class="atToggle" onclick="toggleAtMode('${containerId}',${i},${excludePjId||0})">${toggleLabel}</button>
+      </div>`;
+    } else {
+      html+=`<div class="atRow">
+        <input type="text" id="${containerId}_slot${i}" value="${escHtml(val)}" placeholder="Nome do item (manual)" style="${baseStyle}">
+        <button class="atToggle" onclick="toggleAtMode('${containerId}',${i},${excludePjId||0})">${toggleLabel}</button>
+      </div>`;
+    }
+  }
+  container.innerHTML=html;
+}
+
+function toggleAtMode(containerId, slotIdx, excludePjId){
+  if(!atModes[containerId]) atModes[containerId]=['link','link','link'];
+  const currentVals=getSlotVals(containerId);
+  currentVals[slotIdx]=''; // clear on toggle
+  atModes[containerId][slotIdx]=atModes[containerId][slotIdx]==='link'?'manual':'link';
+  buildAttuneRows(containerId, currentVals, excludePjId||null);
+}
+
+function onAtSlotChange(containerId, excludePjId){
+  const vals=getSlotVals(containerId);
+  buildAttuneRows(containerId, vals, excludePjId||null);
+}
+
+function readAttuneVals(containerId){
+  return getSlotVals(containerId).filter(Boolean);
+}
+
+function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+// ===== GENERIC POPUP =====
+function openGenPopup(name,img){
+  document.getElementById('mGenPopupName')||document.body.insertAdjacentHTML('beforeend',`
+    <div class="mOv" id="mGenPopup" onclick="if(event.target===this)closeM('mGenPopup')">
+      <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:.7rem;max-width:92vw">
+        <button onclick="closeM('mGenPopup')" style="position:absolute;top:-2rem;right:0;background:transparent;border:none;color:#ccc;font-size:1.3rem;cursor:pointer">✕</button>
+        <p id="mGenPopupName" style="font-family:var(--fH);font-weight:700;font-size:1.1rem;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)"></p>
+        <img id="mGenPopupImg" style="max-width:90vw;max-height:80vh;object-fit:contain;border-radius:4px;border:2px solid var(--border2);display:none;box-shadow:0 4px 24px rgba(0,0,0,.5)" src="" alt="">
+        <div id="mGenPopupNoImg" style="display:none;background:var(--bg2);border:2px solid var(--border);border-radius:4px;padding:1.5rem 2.5rem;color:var(--muted);font-style:italic">Sem imagem</div>
+      </div>
+    </div>`);
   document.getElementById('mGenPopupName').textContent=name;
   const imgEl=document.getElementById('mGenPopupImg');
   const noImgEl=document.getElementById('mGenPopupNoImg');
@@ -906,30 +884,73 @@ function openGenPopup(name, img){
   else{imgEl.style.display='none';noImgEl.style.display='block';}
   openM('mGenPopup');
 }
+function openItemPopupByName(name){const it=(AC().itens||[]).find(it=>it.name===name);if(it)openGenPopup(it.name,it.img||null);}
 
-function openItemPopupByName(name){
-  const it=(AC().itens||[]).find(it=>it.name===name);
-  if(it)openGenPopup(it.name,it.img||null);
+// ===== PERSONAGENS =====
+function showPjForm(){
+  document.getElementById('pjForm').style.display='block';
+  document.getElementById('btnShowPjForm').style.display='none';
+  atModes['pj_atRows']=['link','link','link'];
+  buildAttuneRows('pj_atRows',[],null);
 }
-
-function openPJPopupByName(name){
-  const p=(AC().personagens||[]).find(p=>p.name===name);
-  if(p)openGenPopup(p.name,p.img||null);
-}
-function showPjForm(){document.getElementById('pjForm').style.display='block';document.getElementById('btnShowPjForm').style.display='none';refreshAttuneSelects('pj_at1','pj_at2','pj_at3');}
 function hidePjForm(){document.getElementById('pjForm').style.display='none';document.getElementById('btnShowPjForm').style.display='inline-block';}
+
 function addPJ(){
   const camp=AC();if(!camp.personagens)camp.personagens=[];
   const nome=document.getElementById('pj_nome').value.trim();if(!nome)return alert('Digite o nome!');
   const fi=document.getElementById('pj_img');
-  const data={id:Date.now(),name:nome,hpMax:parseInt(document.getElementById('pj_hp').value)||null,ac:parseInt(document.getElementById('pj_ac').value)||null,type:document.getElementById('pj_classe').value.trim()||null,pp:parseInt(document.getElementById('pj_pp').value)||null,cristais:parseInt(document.getElementById('pj_cristais').value)||0,attunados:[document.getElementById('pj_at1').value,document.getElementById('pj_at2').value,document.getElementById('pj_at3').value].filter(Boolean),bg:document.getElementById('pj_bg').value.trim()||null,img:null};
-  const finish=img=>{data.img=img||null;camp.personagens.push(data);['pj_nome','pj_hp','pj_ac','pj_classe','pj_pp','pj_cristais','pj_bg'].forEach(i=>document.getElementById(i).value='');['pj_at1','pj_at2','pj_at3'].forEach(i=>document.getElementById(i).value='');if(fi)fi.value='';hidePjForm();persist();renderPJs();refreshPJSelectInParty();};
+  const attunados=readAttuneVals('pj_atRows');
+  const data={id:Date.now(),name:nome,hpMax:parseInt(document.getElementById('pj_hp').value)||null,ac:parseInt(document.getElementById('pj_ac').value)||null,type:document.getElementById('pj_classe').value.trim()||null,pp:parseInt(document.getElementById('pj_pp').value)||null,cristais:parseInt(document.getElementById('pj_cristais').value)||0,attunados,bg:document.getElementById('pj_bg').value.trim()||null,img:null};
+  const finish=img=>{data.img=img||null;camp.personagens.push(data);['pj_nome','pj_hp','pj_ac','pj_classe','pj_pp','pj_cristais','pj_bg'].forEach(i=>document.getElementById(i).value='');if(fi)fi.value='';hidePjForm();persist();renderPJs();refreshPJSelectInParty();};
   if(fi&&fi.files&&fi.files[0]){const r=new FileReader();r.onload=e=>finish(e.target.result);r.readAsDataURL(fi.files[0]);}else finish(null);
 }
-function openEditPJ(id){const p=(AC().personagens||[]).find(p=>p.id===id);if(!p)return;document.getElementById('epj_id').value=id;document.getElementById('epj_nome').value=p.name||'';document.getElementById('epj_hp').value=p.hpMax||'';document.getElementById('epj_ac').value=p.ac||'';document.getElementById('epj_classe').value=p.type||'';document.getElementById('epj_pp').value=p.pp||'';document.getElementById('epj_cristais').value=p.cristais||0;document.getElementById('epj_bg').value=p.bg||'';document.getElementById('epj_img').value='';document.getElementById('epj_preview').innerHTML=p.img?`<img src="${p.img}" style="max-height:110px;border-radius:3px;border:1px solid var(--border)">`:'';refreshAttuneSelects('epj_at1','epj_at2','epj_at3');['epj_at1','epj_at2','epj_at3'].forEach((sid,i)=>{const el=document.getElementById(sid);if(el)el.value=p.attunados&&p.attunados[i]?p.attunados[i]:'';});openM('mEditPJ');}
-function saveEditPJ(){const id=parseInt(document.getElementById('epj_id').value);const p=(AC().personagens||[]).find(p=>p.id===id);if(!p)return;const n=document.getElementById('epj_nome').value.trim();if(n)p.name=n;const h=parseInt(document.getElementById('epj_hp').value);if(h)p.hpMax=h;const a=parseInt(document.getElementById('epj_ac').value);if(a)p.ac=a;p.type=document.getElementById('epj_classe').value.trim()||null;p.pp=parseInt(document.getElementById('epj_pp').value)||null;p.cristais=parseInt(document.getElementById('epj_cristais').value)||0;p.attunados=[document.getElementById('epj_at1').value,document.getElementById('epj_at2').value,document.getElementById('epj_at3').value].filter(Boolean);p.bg=document.getElementById('epj_bg').value.trim()||null;const fi=document.getElementById('epj_img');const done=()=>{persist();renderPJs();refreshPJSelectInParty();closeM('mEditPJ');};if(fi&&fi.files&&fi.files[0]){const r=new FileReader();r.onload=e=>{p.img=e.target.result;done();};r.readAsDataURL(fi.files[0]);}else done();}
+
+// FIX: use p.id (stable) not array index
+function openEditPJ(id){
+  const p=(AC().personagens||[]).find(p=>p.id===id);
+  if(!p){alert('Personagem não encontrado.');return;}
+  document.getElementById('epj_id').value=id;
+  document.getElementById('epj_nome').value=p.name||'';
+  document.getElementById('epj_hp').value=p.hpMax||'';
+  document.getElementById('epj_ac').value=p.ac||'';
+  document.getElementById('epj_classe').value=p.type||'';
+  document.getElementById('epj_pp').value=p.pp||'';
+  document.getElementById('epj_cristais').value=p.cristais||0;
+  document.getElementById('epj_bg').value=p.bg||'';
+  document.getElementById('epj_img').value='';
+  document.getElementById('epj_preview').innerHTML=p.img?`<img src="${p.img}" style="max-height:110px;border-radius:3px;border:1px solid var(--border)">`:'';
+  // Build attune rows with saved values
+  atModes['epj_atRows']=['link','link','link'];
+  const savedAt=[
+    (p.attunados&&p.attunados[0])||'',
+    (p.attunados&&p.attunados[1])||'',
+    (p.attunados&&p.attunados[2])||'',
+  ];
+  buildAttuneRows('epj_atRows', savedAt, id);
+  openM('mEditPJ');
+}
+
+function saveEditPJ(){
+  const id=parseInt(document.getElementById('epj_id').value);
+  const p=(AC().personagens||[]).find(p=>p.id===id);
+  if(!p)return;
+  const n=document.getElementById('epj_nome').value.trim();if(n)p.name=n;
+  const h=parseInt(document.getElementById('epj_hp').value);if(h)p.hpMax=h;
+  const a=parseInt(document.getElementById('epj_ac').value);if(a)p.ac=a;
+  p.type=document.getElementById('epj_classe').value.trim()||null;
+  p.pp=parseInt(document.getElementById('epj_pp').value)||null;
+  p.cristais=parseInt(document.getElementById('epj_cristais').value)||0;
+  p.attunados=readAttuneVals('epj_atRows');
+  p.bg=document.getElementById('epj_bg').value.trim()||null;
+  const fi=document.getElementById('epj_img');
+  const done=()=>{persist();renderPJs();refreshPJSelectInParty();closeM('mEditPJ');};
+  if(fi&&fi.files&&fi.files[0]){const r=new FileReader();r.onload=e=>{p.img=e.target.result;done();};r.readAsDataURL(fi.files[0]);}else done();
+}
+
 function removePJ(id){if(!confirm('Remover?'))return;const camp=AC();camp.personagens=(camp.personagens||[]).filter(p=>p.id!==id);persist();renderPJs();refreshPJSelectInParty();}
+
 function openPJPopup(id){const p=(AC().personagens||[]).find(p=>p.id===id);if(!p)return;document.getElementById('pjPopName').textContent=p.name;const img=document.getElementById('pjPopImg'),noImg=document.getElementById('pjPopNoImg'),bgEl=document.getElementById('pjPopBg');if(p.img){img.src=p.img;img.style.display='block';noImg.style.display='none';}else{img.style.display='none';noImg.style.display='block';}if(p.bg){bgEl.textContent=p.bg;bgEl.style.display='flex';}else bgEl.style.display='none';openM('mPJPopup');}
+
 function renderPJDash(){
   const pjs=AC().personagens||[];const el=document.getElementById('pjDash');
   if(!pjs.length){el.style.display='none';return;}el.style.display='block';
@@ -941,34 +962,28 @@ function renderPJDash(){
   el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.7rem">
     <div class="dbPanel"><div class="dbTitle">👁 Passive Perception</div>${byPP.length?byPP.map(p=>row(p.name,p.pp)).join(''):empty}</div>
     <div class="dbPanel"><div class="dbTitle">💎 Cristais</div>${byCr.length?byCr.map(p=>row(p.name,p.cristais)).join(''):empty}</div>
-    <div class="dbPanel"><div class="dbTitle">⚡ Itens Attunados</div>${withAt.length?withAt.map(p=>`<div style="margin-bottom:.35rem"><div style="font-family:var(--fH);font-weight:600;font-size:.82rem;color:var(--muted)">${p.name}</div>${p.attunados.map(it=>`<div style="font-family:var(--fB);font-size:.85rem;padding:.1rem 0 .1rem .6rem;border-left:2px solid var(--border);cursor:pointer;color:var(--red)" onclick="openItemPopupByName('${it.replace(/'/g,"\\'")}')">• ${it}</div>`).join('')}</div>`).join(''):empty}</div>
+    <div class="dbPanel"><div class="dbTitle">⚡ Itens Attunados</div>${withAt.length?withAt.map(p=>`<div style="margin-bottom:.35rem"><div style="font-family:var(--fH);font-weight:600;font-size:.82rem;color:var(--muted)">${p.name}</div>${p.attunados.map(it=>`<div style="font-family:var(--fB);font-size:.85rem;padding:.1rem 0 .1rem .6rem;border-left:2px solid var(--border);cursor:pointer;color:var(--red)" onclick="openItemPopupByName('${escHtml(it)}')">• ${it}</div>`).join('')}</div>`).join(''):empty}</div>
   </div>`;
 }
+
 function renderPJs(){
   renderPJDash();
   const el=document.getElementById('pjGrid');
   const pjs=AC().personagens||[];
   if(!pjs.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum personagem ainda.</div>';return;}
-  el.innerHTML=pjs.map((p,idx)=>`
+  el.innerHTML=pjs.map(p=>`
     <div class="fCard" draggable="true" ondragstart="pjDrag(event,${p.id})" ondragover="pjDragOv(event)" ondrop="pjDrop(event,${p.id})" ondragleave="this.classList.remove('drag-over')">
-      <div class="fImg" onclick="openPJPopup(${p.id})">${p.img?`<img src="${p.img}" alt="${p.name}">`:'⬡'}</div>
-      <div class="fName">${p.name}</div>
-      ${p.type?`<div class="tBadge">${p.type}</div>`:''}
+      <div class="fImg" onclick="openPJPopup(${p.id})">${p.img?`<img src="${p.img}" alt="${escHtml(p.name)}">`:'⬡'}</div>
+      <div class="fName">${escHtml(p.name)}</div>
+      ${p.type?`<div class="tBadge">${escHtml(p.type)}</div>`:''}
       <div class="fMeta">${[p.hpMax?'HP:'+p.hpMax:'',p.ac?'AC:'+p.ac:'',p.pp?'PP:'+p.pp:'',p.cristais?'💎'+p.cristais:''].filter(Boolean).join(' · ')}</div>
-      ${p.attunados&&p.attunados.length?`<div style="font-family:var(--fN);font-size:.68rem;color:var(--muted);margin-bottom:.3rem">${p.attunados.map(it=>`<span style="cursor:pointer;color:var(--red)" onclick="openItemPopupByName('${it.replace(/'/g,"\\'")}')" >⚡ ${it}</span>`).join(' · ')}</div>`:''}
-      ${p.bg?`<div style="font-family:var(--fB);font-size:.75rem;color:var(--muted);font-style:italic;margin-bottom:.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${p.bg}</div>`:''}
-      <button class="btn btnOut sm" style="width:100%;margin-top:.3rem" onclick="openEditPJ_byIdx(${idx})">✏ Editar</button>
+      ${p.attunados&&p.attunados.length?`<div style="font-family:var(--fN);font-size:.68rem;color:var(--muted);margin-bottom:.3rem">${p.attunados.map(it=>`<span style="cursor:pointer;color:var(--red)" onclick="openItemPopupByName('${escHtml(it)}')">⚡ ${it}</span>`).join(' · ')}</div>`:''}
+      ${p.bg?`<div style="font-family:var(--fB);font-size:.75rem;color:var(--muted);font-style:italic;margin-bottom:.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${escHtml(p.bg)}</div>`:''}
+      <button class="btn btnOut sm" style="width:100%;margin-top:.3rem" onclick="openEditPJ(${p.id})">✏ Editar</button>
       <button class="btn btnDng sm" style="width:100%;margin-top:.3rem" onclick="removePJ(${p.id})">✕ Remover</button>
     </div>`).join('');
 }
 
-function openEditPJ_byIdx(idx){
-  const pjs=AC().personagens||[];
-  const p=pjs[idx];
-  if(!p)return;
-  openEditPJ(p.id);
-}
-function refreshPJSelectInParty(){const s=document.getElementById('pmPJLink');if(!s)return;const pjs=AC().personagens||[];s.innerHTML='<option value="">— ou preencha manualmente —</option>'+pjs.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');}
 function pjDrag(e,id){pjDragSrc=id;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
 function pjDragOv(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
 function pjDrop(e,tid){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(pjDragSrc===tid)return;const pjs=AC().personagens||[];const si=pjs.findIndex(x=>x.id===pjDragSrc),ti=pjs.findIndex(x=>x.id===tid);if(si<0||ti<0)return;const[item]=pjs.splice(si,1);pjs.splice(ti,0,item);document.querySelectorAll('#pjGrid .fCard').forEach(el=>el.classList.remove('dragging'));persist();renderPJs();}
@@ -992,8 +1007,8 @@ function renderItens(){
   const total=AC().itens&&AC().itens.length||0;
   document.getElementById('itCount').textContent=itens.length<total?itens.length+'/'+total+' itens':'';
   if(!itens.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum item encontrado.</div>';return;}
-  el.innerHTML=itens.map(it=>{const rc=RAR_COLORS[it.raridade]||'var(--muted)';const rb=RAR_BG[it.raridade]||'var(--bg3)';return`<div class="fCard" draggable="true" ondragstart="itDragStart(event,${it.id})" ondragover="itDragOver(event)" ondrop="itDrop(event,${it.id})" ondragleave="this.classList.remove('drag-over')"><div class="fImg" onclick="openItemPopup(${it.id})">${it.img?`<img src="${it.img}" alt="${it.name}">`:'⬡'}</div><div class="fName">${it.name}</div>${it.raridade?`<div style="display:inline-block;font-family:var(--fN);font-size:.62rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;background:${rb};color:${rc};border:1px solid ${rc};margin-bottom:.25rem">${it.raridade}</div>`:''}<div class="fMeta">${[it.tipo||'',it.attune==='yes'?'⚡ Attunement':''].filter(Boolean).join(' · ')}</div>${it.desc?`<div style="font-family:var(--fB);font-size:.75rem;color:var(--muted);font-style:italic;margin-bottom:.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${it.desc}</div>`:''}<button class="btn btnOut sm" style="width:100%;margin-top:.3rem" onclick="openEditItem(${it.id})">✏ Editar</button><button class="btn btnDng sm" style="width:100%;margin-top:.3rem" onclick="removeItem(${it.id})">✕ Remover</button></div>`;}).join('');}
-function openItemPopup(id){const it=(AC().itens||[]).find(it=>it.id===id);if(!it)return;document.getElementById('itPopName').textContent=it.name;const img=document.getElementById('itPopImg'),noImg=document.getElementById('itPopNoImg');if(it.img){img.src=it.img;img.style.display='block';noImg.style.display='none';}else{img.style.display='none';noImg.style.display='block';}const rc=RAR_COLORS[it.raridade]||'#f0e8d8';document.getElementById('itPopInfo').innerHTML=`${it.raridade?`<div style="font-family:var(--fN);font-size:.75rem;font-weight:700;color:${rc};margin-bottom:.3rem;letter-spacing:.5px;text-transform:uppercase">${it.raridade}</div>`:''} ${it.tipo?`<div style="font-family:var(--fN);font-size:.8rem;color:rgba(240,232,216,.7);margin-bottom:.5rem">${it.tipo}${it.attune==='yes'?' · ⚡ Requires Attunement':''}</div>`:(it.attune==='yes'?`<div style="font-family:var(--fN);font-size:.8rem;color:rgba(240,232,216,.7);margin-bottom:.5rem">⚡ Requires Attunement</div>`:'')} ${it.desc?`<div style="font-family:var(--fB);font-size:.95rem;line-height:1.75;white-space:pre-wrap;color:#f0e8d8">${it.desc}</div>`:'<div style="font-family:var(--fB);font-size:.9rem;color:rgba(240,232,216,.5);font-style:italic">Sem descrição.</div>'}`;openM('mItemPopup');}
+  el.innerHTML=itens.map(it=>{const rc=RAR_COLORS[it.raridade]||'var(--muted)';const rb=RAR_BG[it.raridade]||'var(--bg3)';return`<div class="fCard" draggable="true" ondragstart="itDragStart(event,${it.id})" ondragover="itDragOver(event)" ondrop="itDrop(event,${it.id})" ondragleave="this.classList.remove('drag-over')"><div class="fImg" onclick="openItemPopup(${it.id})">${it.img?`<img src="${it.img}" alt="${escHtml(it.name)}">`:'⬡'}</div><div class="fName">${escHtml(it.name)}</div>${it.raridade?`<div style="display:inline-block;font-family:var(--fN);font-size:.62rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;background:${rb};color:${rc};border:1px solid ${rc};margin-bottom:.25rem">${it.raridade}</div>`:''}<div class="fMeta">${[it.tipo||'',it.attune==='yes'?'⚡ Attunement':''].filter(Boolean).join(' · ')}</div>${it.desc?`<div style="font-family:var(--fB);font-size:.75rem;color:var(--muted);font-style:italic;margin-bottom:.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${escHtml(it.desc)}</div>`:''}<button class="btn btnOut sm" style="width:100%;margin-top:.3rem" onclick="openEditItem(${it.id})">✏ Editar</button><button class="btn btnDng sm" style="width:100%;margin-top:.3rem" onclick="removeItem(${it.id})">✕ Remover</button></div>`;}).join('');}
+function openItemPopup(id){const it=(AC().itens||[]).find(it=>it.id===id);if(!it)return;document.getElementById('itPopName').textContent=it.name;const img=document.getElementById('itPopImg'),noImg=document.getElementById('itPopNoImg');if(it.img){img.src=it.img;img.style.display='block';noImg.style.display='none';}else{img.style.display='none';noImg.style.display='block';}const rc=RAR_COLORS[it.raridade]||'#f0e8d8';document.getElementById('itPopInfo').innerHTML=`${it.raridade?`<div style="font-family:var(--fN);font-size:.75rem;font-weight:700;color:${rc};margin-bottom:.3rem;letter-spacing:.5px;text-transform:uppercase">${it.raridade}</div>`:''} ${it.tipo?`<div style="font-family:var(--fN);font-size:.8rem;color:rgba(240,232,216,.7);margin-bottom:.5rem">${escHtml(it.tipo)}${it.attune==='yes'?' · ⚡ Requires Attunement':''}</div>`:(it.attune==='yes'?`<div style="font-family:var(--fN);font-size:.8rem;color:rgba(240,232,216,.7);margin-bottom:.5rem">⚡ Requires Attunement</div>`:'')} ${it.desc?`<div style="font-family:var(--fB);font-size:.95rem;line-height:1.75;white-space:pre-wrap;color:#f0e8d8">${escHtml(it.desc)}</div>`:'<div style="font-family:var(--fB);font-size:.9rem;color:rgba(240,232,216,.5);font-style:italic">Sem descrição.</div>'}`;openM('mItemPopup');}
 function openEditItem(id){const it=(AC().itens||[]).find(it=>it.id===id);if(!it)return;document.getElementById('eItId').value=id;document.getElementById('eItNome').value=it.name;document.getElementById('eItTipo').value=it.tipo||'';document.getElementById('eItRar').value=it.raridade||'';document.getElementById('eItAttune').value=it.attune||'no';document.getElementById('eItDesc').value=it.desc||'';document.getElementById('eItImg').value='';document.getElementById('eItPreview').innerHTML=it.img?`<img src="${it.img}" style="max-height:110px;border-radius:3px;border:1px solid var(--border)">`:'';openM('mEditItem');}
 function saveEditItem(){const id=parseInt(document.getElementById('eItId').value);const it=(AC().itens||[]).find(it=>it.id===id);if(!it)return;const n=document.getElementById('eItNome').value.trim();if(n)it.name=n;it.tipo=document.getElementById('eItTipo').value.trim()||null;it.raridade=document.getElementById('eItRar').value||null;it.attune=document.getElementById('eItAttune').value;it.desc=document.getElementById('eItDesc').value.trim()||null;const fi=document.getElementById('eItImg');const done=()=>{persist();renderItens();refreshItTypeFilter();closeM('mEditItem');};if(fi&&fi.files&&fi.files[0]){const r=new FileReader();r.onload=e=>{it.img=e.target.result;done();};r.readAsDataURL(fi.files[0]);}else done();}
 function removeItem(id){if(!confirm('Remover este item?'))return;const camp=AC();camp.itens=(camp.itens||[]).filter(it=>it.id!==id);persist();renderItens();refreshItTypeFilter();}
@@ -1003,7 +1018,10 @@ function itDrop(e,tid){e.preventDefault();e.currentTarget.classList.remove('drag
 
 // ===== BOOT =====
 document.querySelectorAll('.mOv').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.mOv.open').forEach(m=>m.classList.remove('open'));if(e.key==='Enter'&&document.getElementById('mHp').classList.contains('open'))applyHp(hpTgt&&hpTgt.lastType||'dmg');});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')document.querySelectorAll('.mOv.open').forEach(m=>m.classList.remove('open'));
+  if(e.key==='Enter'&&document.getElementById('mHp').classList.contains('open'))applyHp(hpTgt&&hpTgt.lastType||'dmg');
+});
 
 (async()=>{
   await loadStorage();
@@ -1019,6 +1037,5 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
   }
 })();
 </script>
-<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));}</script>
 </body>
 </html>
