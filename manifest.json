@@ -1,0 +1,24 @@
+{
+  "name": "Companheiro do Mestre",
+  "short_name": "Mestre RPG",
+  "description": "Ferramentas para mesa de RPG",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a1f35",
+  "theme_color": "#8b0000",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
