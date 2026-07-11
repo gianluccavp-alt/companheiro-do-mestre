@@ -1,0 +1,141 @@
+export interface Creature {
+  id: number
+  name: string
+  init: number
+  initReal: number
+  hp: number
+  hpMax: number
+  ac: number | null
+  fichaId: string | number
+  dead: boolean
+  conditions: string[]
+  customConditionLabel?: Record<string, string>
+  // Extensões (opcionais para compatibilidade com dados antigos)
+  tempHp?: number
+  initBonus?: number | null
+  resist?: string[]
+  vuln?: string[]
+  immune?: string[]
+  isLegendary?: boolean
+  legActionsMax?: number
+  legActions?: number
+  conditionDurations?: Record<string, number>
+}
+
+export interface CombatLogEntry {
+  id: number
+  round: number
+  text: string
+}
+
+export interface StatEntry {
+  name: string
+  desc: string
+}
+
+export interface Ficha {
+  id: number
+  name: string
+  hpMax: number | null
+  ac: number | null
+  initBonus: number | null
+  type: string | null
+  img: string | null
+  // Statblock (opcionais)
+  size?: string | null
+  alignment?: string | null
+  cr?: string | null
+  speed?: string | null
+  str?: number | null
+  dex?: number | null
+  con?: number | null
+  int?: number | null
+  wis?: number | null
+  cha?: number | null
+  // Traços e ações: lista estruturada (nome + descrição).
+  // Dados antigos podem estar como string; use toEntries() para normalizar.
+  traits?: StatEntry[] | string | null
+  actions?: StatEntry[] | string | null
+}
+
+export interface PartyMember {
+  name: string
+  hpMax: number
+  ac: number | null
+}
+
+export interface Personagem {
+  id: number
+  name: string
+  hpMax: number | null
+  ac: number | null
+  type: string | null
+  pp: number | null
+  cristais: number
+  attunados: string[]
+  bg: string | null
+  img: string | null
+}
+
+export interface Item {
+  id: number
+  name: string
+  tipo: string | null
+  raridade: string | null
+  attune: 'yes' | 'no'
+  desc: string | null
+  img: string | null
+}
+
+export interface DiaryEntry {
+  id: number
+  day: string
+  title: string
+  body: string
+  date: string
+  tags?: string[]
+}
+
+export interface Campaign {
+  id: string
+  name: string
+  diary: DiaryEntry[]
+  fichas: Ficha[]
+  party: PartyMember[]
+  creatures: Creature[]
+  personagens: Personagem[]
+  itens: Item[]
+  currentTurn: number
+  // Extensões (opcionais)
+  round?: number
+  combatLog?: CombatLogEntry[]
+  references?: Reference[]
+}
+
+export interface Settings {
+  theme: 'light' | 'dark'
+}
+
+export interface Reference {
+  id: number
+  name: string
+  type: string
+  content: string
+  img?: string | null
+  url?: string | null
+  catParent?: string
+  catChild?: string
+}
+
+export interface PersistedData {
+  campaigns: Campaign[]
+  activeId: string | null
+}
+
+export interface Condition {
+  k: string
+  l: string
+  c?: boolean
+  d: string
+  custom?: boolean
+}

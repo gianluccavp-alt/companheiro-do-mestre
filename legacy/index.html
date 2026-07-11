@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Companheiro do Mestre</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#8b0000">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5efe0;--bg2:#ede3cc;--bg3:#e5d8b8;--light:#faf6ec;
+  --red:#8b0000;--red2:#a51c1c;--ink:#1a1008;
+  --border:#7a4a1e;--border2:#5c3510;
+  --gold:#b8860b;--muted:#5a3e28;
+  --fT:'Bebas Neue',sans-serif;
+  --fH:'Cormorant Garamond',serif;
+  --fB:'EB Garamond',serif;
+  --fN:'Source Sans 3',sans-serif;
+}
+body{background:var(--bg);font-family:var(--fB);color:var(--ink);min-height:100vh;overflow-x:hidden}
+.header{text-align:center;padding:1.5rem 1rem .8rem;background:var(--bg2);border-bottom:4px double var(--border2);position:relative}
+.header::before{content:'';display:block;height:5px;background:repeating-linear-gradient(90deg,var(--red) 0,var(--red) 8px,transparent 8px,transparent 12px);position:absolute;top:0;left:0;right:0}
+.d20{font-size:1.3rem;letter-spacing:10px;color:var(--red);opacity:.6;margin-bottom:.2rem}
+.title{font-family:var(--fT);font-size:clamp(2rem,6vw,3.5rem);color:var(--red);letter-spacing:4px;text-shadow:1px 1px 0 rgba(0,0,0,.12)}
+.subtitle{font-family:var(--fH);font-size:1rem;color:var(--muted);font-style:italic}
+.hRule{height:2px;background:linear-gradient(90deg,transparent,var(--border),var(--border2),var(--border),transparent);margin:.7rem auto;max-width:500px}
+.campBar{display:flex;align-items:center;justify-content:center;gap:.4rem;margin:.5rem auto 0;flex-wrap:wrap;padding:.45rem .8rem;background:var(--bg3);border:1.5px solid var(--border);border-radius:4px;max-width:620px}
+.campLabel{font-family:var(--fH);font-size:.78rem;font-weight:600;color:var(--muted);white-space:nowrap}
+.campSel{font-family:var(--fH);font-size:.88rem;background:var(--light);border:1px solid var(--border);color:var(--red);padding:.28rem .6rem;border-radius:3px;flex:1;min-width:120px;max-width:220px;cursor:pointer}
+.campSel:focus{outline:none;border-color:var(--red)}
+.hActions{display:flex;justify-content:center;gap:.4rem;margin-top:.55rem;flex-wrap:wrap}
+.storageStatus{font-family:var(--fN);font-size:.7rem;color:var(--muted);margin-top:.3rem;text-align:center}
+.hStripe{height:5px;background:repeating-linear-gradient(90deg,var(--red) 0,var(--red) 8px,transparent 8px,transparent 12px);margin-top:.8rem;opacity:.55}
+.nav{display:flex;justify-content:center;gap:.4rem;padding:.55rem;flex-wrap:wrap;background:var(--red);border-bottom:3px solid var(--border2)}
+.nav-btn{font-family:var(--fH);font-size:.9rem;font-weight:600;padding:.38rem 1.1rem;background:transparent;border:1.5px solid rgba(255,255,255,.3);color:rgba(255,255,255,.85);cursor:pointer;border-radius:3px;transition:all .2s;letter-spacing:.5px}
+.nav-btn:hover,.nav-btn.active{background:rgba(0,0,0,.25);border-color:rgba(255,255,255,.8);color:#fff}
+.section{display:none;padding:1.2rem;max-width:920px;margin:0 auto}
+.section.active{display:block}
+.sTitle{font-family:var(--fH);font-size:1.45rem;font-weight:700;color:var(--red);text-align:center;margin-bottom:1.1rem;padding-bottom:.45rem;border-bottom:2px solid var(--border)}
+.sTitle::before,.sTitle::after{content:'⬡';font-size:.85rem;color:var(--red);opacity:.45;margin:0 .5rem}
+.card{background:var(--light);border:1.5px solid var(--border);border-radius:3px;padding:1rem;margin-bottom:1rem;box-shadow:2px 2px 5px rgba(0,0,0,.07)}
+.card::before{content:'';display:block;height:3px;background:var(--red);margin:-1rem -1rem .8rem;border-radius:2px 2px 0 0;opacity:.65}
+.fRow{display:flex;gap:.65rem;flex-wrap:wrap;margin-bottom:.75rem;align-items:flex-end}
+.fGrp{display:flex;flex-direction:column;gap:.22rem;flex:1;min-width:100px}
+label{font-family:var(--fN);font-size:.7rem;font-weight:600;color:var(--muted);letter-spacing:.6px;text-transform:uppercase}
+input[type=text],input[type=number],textarea,select{background:var(--bg);border:1px solid var(--border);color:var(--ink);padding:.4rem .65rem;border-radius:3px;font-family:var(--fB);font-size:.95rem;width:100%}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--red);background:var(--light)}
+textarea{resize:vertical;min-height:80px}
+.btn{font-family:var(--fH);font-weight:600;font-size:.82rem;padding:.4rem .9rem;border:1.5px solid;border-radius:3px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btnRed{background:var(--red);border-color:var(--border2);color:#fff}
+.btnRed:hover{background:var(--red2)}
+.btnDng{background:#5a0a0a;border-color:#3d0606;color:#ffc8c8}
+.btnDng:hover{background:#3d0606}
+.btnOut{background:transparent;border-color:var(--border);color:var(--muted)}
+.btnOut:hover{border-color:var(--red);color:var(--red)}
+.sm{padding:.24rem .52rem;font-size:.75rem}
+.cRow{display:flex;align-items:center;gap:.55rem;padding:.6rem .85rem;background:var(--light);border:1px solid var(--border);border-left:4px solid var(--red);border-radius:2px;margin-bottom:.42rem;flex-wrap:wrap;box-shadow:1px 1px 3px rgba(0,0,0,.05)}
+.cRow.aTurn{border-left-color:var(--gold);background:#fff9ec}
+.cRow.dead{opacity:.4;filter:grayscale(.7)}
+.iBadge{font-family:var(--fN);font-size:.95rem;font-weight:700;min-width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:2px solid;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.cName{font-family:var(--fH);font-weight:600;font-size:.98rem;color:var(--red);cursor:pointer;flex:1;min-width:70px;line-height:1.3}
+.cName:hover{text-decoration:underline}
+.hpArea{display:flex;align-items:center;gap:.32rem;flex-shrink:0}
+.hpWrap{width:65px;height:5px;background:rgba(0,0,0,.1);border-radius:2px;overflow:hidden}
+.hpBar{height:100%;border-radius:2px;transition:width .3s,background .3s}
+.hpVal{font-family:var(--fN);font-size:.78rem;min-width:56px;text-align:center}
+.acVal{font-family:var(--fN);font-size:.75rem;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.tInd{font-family:var(--fH);font-size:.68rem;color:var(--gold);white-space:nowrap;font-style:italic}
+.tBanner{background:#fff3cd;border:1px solid var(--gold);border-left:4px solid var(--gold);border-radius:2px;padding:.4rem .9rem;text-align:center;margin-bottom:.75rem;font-family:var(--fH);font-weight:600;font-size:.9rem;color:#6b4c00}
+.divLine{display:flex;align-items:center;gap:.5rem;margin:.35rem 0;opacity:.65}
+.divLine hr{flex:1;border:none;border-top:1px dashed var(--border)}
+.divLine span{font-family:var(--fN);font-size:.68rem;color:var(--muted);white-space:nowrap}
+.sdWrap{position:relative;flex-shrink:0}
+.sdBtn{font-family:var(--fH);font-weight:600;font-size:.72rem;padding:.24rem .5rem;border:1px solid var(--border);background:var(--bg2);color:var(--muted);border-radius:3px;cursor:pointer;white-space:nowrap}
+.sdBtn:hover{border-color:var(--red);color:var(--red)}
+.sdMenu{position:absolute;top:110%;right:0;background:var(--light);border:1.5px solid var(--red);border-radius:3px;padding:.4rem;z-index:50;min-width:160px;display:none;max-height:260px;overflow-y:auto;box-shadow:2px 4px 10px rgba(0,0,0,.14)}
+.sdMenu.open{display:block}
+.sdOpt{display:flex;align-items:center;gap:.5rem;padding:.27rem .5rem;border-radius:2px;cursor:pointer;font-family:var(--fB);font-size:.85rem;white-space:nowrap}
+.sdOpt:hover{background:var(--bg3)}
+.sdOpt input{accent-color:var(--red);width:14px;height:14px;flex-shrink:0}
+.sPills{display:flex;flex-wrap:wrap;gap:.22rem;margin-top:.28rem}
+.sPill{font-family:var(--fN);font-size:.65rem;font-weight:600;padding:.13rem .38rem;border-radius:2px;cursor:pointer;border:1px solid;position:relative}
+.sPill.conc{background:#ddeeff;border-color:#6699cc;color:#1a3a6b}
+.sPill.other{background:#fde8e8;border-color:#c88;color:var(--red)}
+.sPill:hover{opacity:.75}
+.sPill .tip{display:none;position:fixed;background:#1a1008;border:1px solid var(--red);border-radius:3px;padding:.5rem .7rem;font-family:var(--fB);font-size:.78rem;color:#f5efe0;max-width:260px;line-height:1.55;z-index:9999;pointer-events:none;box-shadow:2px 4px 10px rgba(0,0,0,.5)}
+.sPill:hover .tip{display:block}
+.dEntry{background:var(--light);border:1px solid var(--border);border-left:4px solid var(--red);border-radius:2px;padding:.82rem 1rem;margin-bottom:.75rem;box-shadow:1px 1px 3px rgba(0,0,0,.05);user-select:none}
+.dEntry.drag-over{border-top:2px solid var(--red)}
+.dEntry .hl{background:#ffe066;border-radius:2px}
+.dHead{display:flex;align-items:center;gap:.5rem;cursor:pointer}
+.dDate{font-family:var(--fN);font-size:.8rem;font-weight:600;color:var(--red)}
+.dTitleT{font-family:var(--fH);font-weight:700;font-size:1rem;flex:1}
+.dPrev{font-family:var(--fB);font-size:.9rem;color:var(--muted);font-style:italic;margin-top:.28rem}
+.dBody{display:none;margin-top:.65rem}
+.dBody.open{display:block}
+.dBodyT{font-family:var(--fB);font-size:.97rem;line-height:1.78;white-space:pre-wrap}
+.dActs{display:flex;gap:.4rem;margin-top:.65rem;flex-wrap:wrap}
+.dragH{color:var(--border);cursor:grab;font-size:1rem;padding:0 .2rem;flex-shrink:0}
+.sBars{display:flex;gap:.5rem;align-items:center;margin-bottom:.75rem}
+.sBars input{flex:1}
+.sCount{font-family:var(--fN);font-size:.8rem;color:var(--muted);font-style:italic;white-space:nowrap}
+.fGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:.9rem}
+.fCard{background:var(--light);border:1.5px solid var(--border);border-radius:3px;padding:.7rem;text-align:center;transition:border-color .2s;cursor:grab;box-shadow:1px 1px 4px rgba(0,0,0,.07)}
+.fCard:hover{border-color:var(--red)}
+.fCard.drag-over{border-color:var(--red);border-top:3px solid var(--red)}
+.fImg{width:100%;height:140px;border-radius:2px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:2.5rem;border:1px solid var(--border);overflow:hidden;cursor:pointer}
+.fImg img{width:100%;height:100%;object-fit:cover;transition:transform .2s}
+.fImg:hover img{transform:scale(1.04)}
+.fName{font-family:var(--fH);font-weight:700;color:var(--red);font-size:.88rem;margin:.45rem 0 .15rem}
+.fMeta{font-family:var(--fN);font-size:.75rem;color:var(--muted);margin-bottom:.3rem;line-height:1.6}
+.tBadge{display:inline-block;font-family:var(--fN);font-size:.62rem;font-weight:600;padding:.1rem .35rem;border-radius:2px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.4px}
+.mOv{display:none;position:fixed;inset:0;background:rgba(20,10,5,.75);z-index:200;align-items:center;justify-content:center}
+.mOv.open{display:flex}
+.modal{background:var(--bg2);border:2px solid var(--border2);border-radius:4px;padding:1.4rem;min-width:270px;max-width:92vw;position:relative;max-height:90vh;overflow-y:auto;box-shadow:4px 6px 20px rgba(0,0,0,.28)}
+.modal::before{content:'';display:block;height:4px;background:var(--red);margin:-1.4rem -1.4rem 1rem;border-radius:2px 2px 0 0}
+.modal h3{font-family:var(--fH);font-weight:700;color:var(--red);margin-bottom:.85rem;font-size:1.1rem}
+.mClose{position:absolute;top:.8rem;right:.9rem;background:transparent;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;font-weight:700}
+.mClose:hover{color:var(--red)}
+.ulabel{display:block;text-align:center;padding:.65rem;border:2px dashed var(--border);border-radius:3px;color:var(--muted);cursor:pointer;font-family:var(--fB);font-size:.9rem;transition:border-color .2s;margin-top:.5rem}
+.ulabel:hover{border-color:var(--red);color:var(--red)}
+input[type=file]{display:none}
+.empty{text-align:center;color:var(--muted);padding:2rem;font-style:italic;opacity:.7}
+.dbPanel{background:var(--light);border:1.5px solid var(--border);border-top:3px solid var(--red);border-radius:3px;padding:.7rem .9rem}
+.dbTitle{font-family:var(--fH);font-weight:700;color:var(--red);font-size:.88rem;margin-bottom:.45rem}
+.dbRow{display:flex;justify-content:space-between;align-items:center;padding:.18rem 0;border-bottom:1px dashed var(--bg3)}
+.dbRow span:first-child{font-family:var(--fB);font-size:.88rem}
+.dbRow span:last-child{font-family:var(--fN);font-weight:700;font-size:.95rem}
+.atRow{display:flex;gap:.4rem;align-items:center;margin-bottom:.4rem}
+.atRow select,.atRow input[type=text]{flex:1;min-width:0}
+.atOr{font-family:var(--fN);font-size:.75rem;color:var(--muted);flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="d20">⬡ ⬡ ⬡</div>
+  <h1 class="title">COMPANHEIRO DO MESTRE</h1>
+  <p class="subtitle">Ferramentas para a sua Mesa de RPG</p>
+  <div class="hRule"></div>
+  <div class="campBar">
+    <span class="campLabel">⬡ Campanha:</span>
+    <select id="campSel" class="campSel" onchange="switchCamp()"></select>
+    <button class="btn btnOut sm" onclick="openM('mNewCamp')">+ Nova</button>
+    <button class="btn btnOut sm" onclick="openRenameCamp()">✏</button>
+    <button class="btn btnDng sm" onclick="deleteCamp()">✕ Apagar</button>
+  </div>
+  <div class="hActions">
+    <button class="btn btnOut sm" onclick="exportData()">⬡ Exportar</button>
+    <button class="btn btnOut sm" onclick="document.getElementById('importFile').click()">⬡ Importar</button>
+    <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+  </div>
+  <div class="storageStatus" id="storageStatus"></div>
+  <div class="hStripe"></div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showSec('sInit',this)">⬡ Iniciativa</button>
+  <button class="nav-btn" onclick="showSec('sFichas',this)">⬡ Fichas & Status</button>
+  <button class="nav-btn" onclick="showSec('sPJs',this)">⬡ Personagens</button>
+  <button class="nav-btn" onclick="showSec('sItens',this)">⬡ Itens Mágicos</button>
+  <button class="nav-btn" onclick="showSec('sDiary',this)">⬡ Diário de Campanha</button>
+</nav>
+
+<div id="sInit" class="section active">
+  <h2 class="sTitle">Controlador de Iniciativa</h2>
+  <div class="card">
+    <div class="fRow">
+      <div class="fGrp"><label>Vincular Ficha</label><select id="cFichaLink" onchange="autofillFicha()"><option value="">— nenhuma —</option></select></div>
+      <div class="fGrp"><label>Nome</label><input type="text" id="cName" placeholder="Ex: Goblin"></div>
+      <div class="fGrp" style="max-width:75px"><label>Init</label><input type="number" id="cInit" placeholder="12"></div>
+      <div class="fGrp" style="max-width:75px"><label>HP Máx</label><input type="number" id="cHpMax" placeholder="30"></div>
+      <div class="fGrp" style="max-width:68px"><label>AC</label><input type="number" id="cAc" placeholder="14"></div>
+      <div class="fGrp" style="justify-content:flex-end;max-width:105px"><button class="btn btnRed" onclick="addCreature()">+ Adicionar</button></div>
+    </div>
+    <div id="cInitBonusHint" style="display:none;font-family:var(--fN);font-size:.75rem;color:var(--gold);margin-top:.3rem"></div>
+  </div>
+  <div style="display:flex;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap">
+    <button class="btn btnOut" onclick="nextTurn()">▶ Próximo Turno</button>
+    <button class="btn btnOut" onclick="resetTurns()">↺ Reiniciar</button>
+    <button class="btn btnOut" onclick="openPartyConfig()">⬡ Configurar Party</button>
+    <button class="btn btnDng sm" onclick="openNewCombat()">⬡ Novo Combate</button>
+  </div>
+  <div id="tBanner" class="tBanner" style="display:none"></div>
+  <div id="creatureList"></div>
+</div>
+
+<div id="sFichas" class="section">
+  <h2 class="sTitle">Fichas & Status</h2>
+  <div class="card">
+    <div class="fRow">
+      <div class="fGrp"><label>Nome</label><input type="text" id="fName" placeholder="Ex: Capitão Blacktide"></div>
+      <div class="fGrp" style="max-width:85px"><label>HP Máx</label><input type="number" id="fHpMax"></div>
+      <div class="fGrp" style="max-width:72px"><label>AC</label><input type="number" id="fAc"></div>
+      <div class="fGrp" style="max-width:90px"><label>Init. Bonus</label><input type="number" id="fInitBonus" placeholder="+2"></div>
+      <div class="fGrp"><label>Tipo</label><input type="text" id="fType" placeholder="Ex: Humanoide"></div>
+    </div>
+    <label class="ulabel" for="fImg">⬡ Clique para carregar imagem</label>
+    <input type="file" id="fImg" accept="image/*">
+    <div style="text-align:right;margin-top:.8rem"><button class="btn btnRed" onclick="addFicha()">+ Adicionar Ficha</button></div>
+  </div>
+  <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.8rem;flex-wrap:wrap">
+    <input type="text" id="fichaSearch" placeholder="⬡ Pesquisar..." oninput="renderFichas()" style="flex:1;max-width:240px">
+    <select id="fichaTypeFilter" onchange="renderFichas()" style="font-family:var(--fH);font-size:.85rem;background:var(--light);border:1px solid var(--border);color:var(--ink);padding:.35rem .6rem;border-radius:3px;max-width:160px"><option value="">Todos os Tipos</option></select>
+    <span id="fichaCount" style="font-family:var(--fN);font-size:.78rem;color:var(--muted)"></span>
+  </div>
+  <p style="font-family:var(--fN);font-size:.75rem;color:var(--muted);font-style:italic;margin-bottom:.8rem;text-align:center">Clique na imagem para ampliar · Arraste para reordenar</p>
+  <div id="fichasGrid" class="fGrid"></div>
+</div>
+
+<div id="sPJs" class="section">
+  <h2 class="sTitle">Personagens</h2>
+  <div id="pjForm" style="display:none;margin-bottom:1rem">
+    <div class="card">
+      <div class="fRow">
+        <div class="fGrp"><label>Nome</label><input type="text" id="pj_nome" placeholder="Ex: Aldric"></div>
+        <div class="fGrp" style="max-width:82px"><label>HP Máx</label><input type="number" id="pj_hp"></div>
+        <div class="fGrp" style="max-width:68px"><label>AC</label><input type="number" id="pj_ac"></div>
+      </div>
+      <div class="fRow">
+        <div class="fGrp"><label>Classe</label><input type="text" id="pj_classe" placeholder="Ex: Paladino"></div>
+        <div class="fGrp" style="max-width:90px"><label>Passive Perc.</label><input type="number" id="pj_pp"></div>
+        <div class="fGrp" style="max-width:85px"><label>Cristais</label><input type="number" id="pj_cristais" min="0" value="0"></div>
+      </div>
+      <div style="margin-bottom:.7rem">
+        <label style="display:block;margin-bottom:.35rem">Itens Attunados <span style="font-family:var(--fN);font-size:.68rem;color:var(--muted)">(opcionais, máx. 3)</span></label>
+        <div class="atRow"><select id="pj_at1s"></select><span class="atOr">ou</span><input type="text" id="pj_at1t" placeholder="manual"></div>
+        <div class="atRow"><select id="pj_at2s"></select><span class="atOr">ou</span><input type="text" id="pj_at2t" placeholder="manual"></div>
+        <div class="atRow"><select id="pj_at3s"></select><span class="atOr">ou</span><input type="text" id="pj_at3t" placeholder="manual"></div>
+      </div>
+      <label class="ulabel" for="pj_img">⬡ Clique para carregar imagem</label>
+      <input type="file" id="pj_img" accept="image/*">
+      <div class="fGrp" style="margin-top:.8rem"><label>Background</label><textarea id="pj_bg" style="min-height:120px" placeholder="História, motivações, segredos..."></textarea></div>
+      <div style="display:flex;gap:.5rem;margin-top:.8rem;justify-content:flex-end">
+        <button class="btn btnOut" onclick="hidePjForm()">Cancelar</button>
+        <button class="btn btnRed" onclick="addPJ()">+ Salvar Personagem</button>
+      </div>
+    </div>
+  </div>
+  <div style="margin-bottom:.8rem"><button class="btn btnRed" id="btnShowPjForm" onclick="showPjForm()">+ Adicionar Personagem</button></div>
+  <div id="pjDash" style="display:none;margin-bottom:1.2rem"></div>
+  <p style="font-family:var(--fN);font-size:.75rem;color:var(--muted);font-style:italic;margin-bottom:.8rem;text-align:center">Clique na imagem para ampliar · Arraste para reordenar</p>
+  <div id="pjGrid" class="fGrid"></div>
+</div>
+
+<div id="sItens" class="section">
+  <h2 class="sTitle">Itens Mágicos</h2>
+  <div class="card">
+    <div class="fRow">
+      <div class="fGrp"><label>Nome</label><input type="text" id="it_nome" placeholder="Ex: Espada +1"></div>
+      <div class="fGrp" style="max-width:140px"><label>Tipo</label><input type="text" id="it_tipo" placeholder="Ex: Arma"></div>
+      <div class="fGrp" style="max-width:145px"><label>Raridade</label>
+        <select id="it_raridade"><option value="">— selecione —</option><option>Uncommon</option><option>Rare</option><option>Very Rare</option><option>Legendary</option><option>Artifact</option></select>
+      </div>
+      <div class="fGrp" style="max-width:120px"><label>Attunamento</label>
+        <select id="it_attune"><option value="no">Não</option><option value="yes">Sim</option></select>
+      </div>
+    </div>
+    <label class="ulabel" for="it_img">⬡ Clique para carregar imagem</label>
+    <input type="file" id="it_img" accept="image/*">
+    <div class="fGrp" style="margin-top:.8rem"><label>Descrição</label><textarea id="it_desc" style="min-height:90px" placeholder="Descreva o item..."></textarea></div>
+    <div style="text-align:right;margin-top:.8rem"><button class="btn btnRed" onclick="addItem()">+ Adicionar Item</button></div>
+  </div>
+  <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.8rem;flex-wrap:wrap">
+    <input type="text" id="itSearch" placeholder="⬡ Pesquisar..." oninput="renderItens()" style="flex:1;max-width:200px">
+    <select id="itRarFilter" onchange="renderItens()" style="font-family:var(--fH);font-size:.85rem;background:var(--light);border:1px solid var(--border);color:var(--ink);padding:.35rem .6rem;border-radius:3px;max-width:140px"><option value="">Todas Raridades</option><option>Uncommon</option><option>Rare</option><option>Very Rare</option><option>Legendary</option><option>Artifact</option></select>
+    <select id="itTypeFilter" onchange="renderItens()" style="font-family:var(--fH);font-size:.85rem;background:var(--light);border:1px solid var(--border);color:var(--ink);padding:.35rem .6rem;border-radius:3px;max-width:140px"><option value="">Todos os Tipos</option></select>
+    <select id="itSort" onchange="renderItens()" style="font-family:var(--fH);font-size:.85rem;background:var(--light);border:1px solid var(--border);color:var(--ink);padding:.35rem .6rem;border-radius:3px;max-width:155px"><option value="none">Sem ordenação</option><option value="type">Por Tipo</option><option value="rar_asc">Menor Raridade</option><option value="rar_desc">Maior Raridade</option></select>
+    <span id="itCount" style="font-family:var(--fN);font-size:.78rem;color:var(--muted)"></span>
+  </div>
+  <p style="font-family:var(--fN);font-size:.75rem;color:var(--muted);font-style:italic;margin-bottom:.8rem;text-align:center">Clique na imagem para ampliar · Arraste para reordenar</p>
+  <div id="itensGrid" class="fGrid"></div>
+</div>
+
+<div id="sDiary" class="section">
+  <h2 class="sTitle">Diário de Campanha</h2>
+  <div class="sBars">
+    <input type="text" id="diarySearch" placeholder="⬡ Pesquisar registros..." oninput="renderDiary()">
+    <span class="sCount" id="searchCount"></span>
+    <button class="btn btnOut sm" onclick="document.getElementById('diarySearch').value='';renderDiary()">✕</button>
+  </div>
+  <div class="card">
+    <div class="fRow">
+      <div class="fGrp" style="max-width:200px"><label>Dia</label><input type="text" id="dDay" placeholder="Dia 1"></div>
+      <div class="fGrp"><label>Título</label><input type="text" id="dTitle" placeholder="Ex: O Ataque"></div>
+    </div>
+    <div class="fGrp" style="margin-bottom:.8rem"><label>O que aconteceu?</label><textarea id="dBody" placeholder="Descreva os eventos..."></textarea></div>
+    <button class="btn btnRed" onclick="addDiaryEntry()">⬡ Registrar no Diário</button>
+  </div>
+  <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.8rem;flex-wrap:wrap">
+    <span style="font-family:var(--fN);font-size:.78rem;color:var(--muted)">Ordenar:</span>
+    <button class="btn sm btnOut" onclick="sortDiary('newest')">Mais Recente</button>
+    <button class="btn sm btnOut" onclick="sortDiary('oldest')">Mais Antiga</button>
+    <span style="font-family:var(--fB);font-size:.75rem;color:var(--muted);font-style:italic">ou arraste para reordenar</span>
+    <button class="btn sm btnRed" style="margin-left:auto" onclick="exportDiaryToWord()">📄 Exportar para Word</button>
+  </div>
+  <div id="diaryList"></div>
+</div>
+
+<div class="mOv" id="mHp"><div class="modal" style="text-align:center;min-width:240px">
+  <button class="mClose" onclick="closeM('mHp')">✕</button>
+  <h3 id="mHpTitle">Alterar HP</h3>
+  <input type="number" id="mHpAmt" min="1" placeholder="0" style="text-align:center;font-size:1.4rem;width:100px;margin:.4rem auto;display:block">
+  <div style="display:flex;gap:.5rem;justify-content:center;margin-top:.7rem">
+    <button class="btn btnDng" onclick="applyHp('dmg')">Dano</button>
+    <button class="btn btnRed" onclick="applyHp('heal')">Cura</button>
+  </div>
+</div></div>
+
+<div class="mOv" id="mFichaPopup">
+  <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:.6rem;max-width:92vw">
+    <button onclick="closeM('mFichaPopup')" style="position:absolute;top:-2rem;right:0;background:transparent;border:none;color:#ccc;font-size:1.3rem;cursor:pointer">✕</button>
+    <p id="fpName" style="font-family:var(--fH);font-weight:700;font-size:1.1rem;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)"></p>
+    <img id="fpImg" style="max-width:90vw;max-height:85vh;object-fit:contain;border-radius:4px;border:2px solid var(--border2);display:none;box-shadow:0 4px 24px rgba(0,0,0,.5)" src="" alt="">
+    <div id="fpNoImg" style="display:none;background:var(--bg2);border:2px solid var(--border);border-radius:4px;padding:1.5rem 2.5rem;color:var(--muted);font-style:italic">Sem imagem</div>
+  </div>
+</div>
+
+<div class="mOv" id="mImgViewer">
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <img id="mImgSrc" style="max-width:90vw;max-height:88vh;object-fit:contain;border-radius:4px;border:2px solid var(--border2);box-shadow:0 4px 24px rgba(0,0,0,.5)">
+    <p style="color:#ccc;font-family:var(--fN);font-size:.78rem;margin-top:.5rem;font-style:italic">Clique para fechar</p>
+  </div>
+</div>
+
+<div class="mOv" id="mPJPopup">
+  <div style="position:relative;max-width:90vw;width:700px">
+    <button onclick="closeM('mPJPopup')" style="position:absolute;top:-2rem;right:0;background:transparent;border:none;color:#ccc;font-size:1.3rem;cursor:pointer">✕</button>
+    <p id="pjPopName" style="font-family:var(--fH);font-weight:700;font-size:1.1rem;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);margin-bottom:.5rem;text-align:center"></p>
+    <div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex:0 0 auto;max-width:300px">
+        <img id="pjPopImg" style="max-width:100%;max-height:70vh;object-fit:contain;border-radius:4px;border:2px solid var(--border2);display:none;box-shadow:0 4px 24px rgba(0,0,0,.5)" src="" alt="">
+        <div id="pjPopNoImg" style="display:none;background:var(--bg2);border:2px solid var(--border);border-radius:4px;padding:1.5rem 2rem;color:var(--muted);font-style:italic">Sem imagem</div>
+      </div>
+      <div id="pjPopBg" style="display:none;flex:1;min-width:180px;background:rgba(10,5,2,.78);border:1px solid var(--border);border-radius:4px;padding:.9rem 1.1rem;font-family:var(--fB);font-size:.95rem;color:#f0e8d8;line-height:1.75;white-space:pre-wrap;max-height:70vh;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<div class="mOv" id="mGenPopup">
+  <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:.7rem;max-width:92vw">
+    <button onclick="closeM('mGenPopup')" style="position:absolute;top:-2rem;right:0;background:transparent;border:none;color:#ccc;font-size:1.3rem;cursor:pointer">✕</button>
+    <p id="mGenPopupName" style="font-family:var(--fH);font-weight:700;font-size:1.1rem;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)"></p>
+    <img id="mGenPopupImg" style="max-width:90vw;max-height:80vh;object-fit:contain;border-radius:4px;border:2px solid var(--border2);display:none;box-shadow:0 4px 24px rgba(0,0,0,.5)" src="" alt="">
+    <div id="mGenPopupNoImg" style="display:none;background:var(--bg2);border:2px solid var(--border);border-radius:4px;padding:1.5rem 2.5rem;color:var(--muted);font-style:italic">Sem imagem</div>
+  </div>
+</div>
+
+<div class="mOv" id="mItemPopup">
+  <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:.7rem;max-width:92vw">
+    <button onclick="closeM('mItemPopup')" style="position:absolute;top:-2rem;right:0;background:transparent;border:none;color:#ccc;font-size:1.3rem;cursor:pointer">✕</button>
+    <p id="itPopName" style="font-family:var(--fH);font-weight:700;font-size:1.1rem;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)"></p>
+    <img id="itPopImg" style="max-width:90vw;max-height:75vh;object-fit:contain;border-radius:4px;border:2px solid var(--border2);display:none;box-shadow:0 4px 24px rgba(0,0,0,.5)" src="" alt="">
+    <div id="itPopNoImg" style="display:none;background:var(--bg2);border:2px solid var(--border);border-radius:4px;padding:1.5rem 2.5rem;color:var(--muted);font-style:italic">Sem imagem</div>
+    <div id="itPopInfo" style="max-width:600px;width:90vw;background:rgba(10,5,2,.78);border:1px solid var(--border);border-radius:4px;padding:.9rem 1.1rem;font-family:var(--fB);font-size:.95rem;color:#f0e8d8;line-height:1.75;max-height:30vh;overflow-y:auto"></div>
+  </div>
+</div>
+
+<div class="mOv" id="mEditDiary"><div class="modal" style="max-width:500px;width:90vw">
+  <button class="mClose" onclick="closeM('mEditDiary')">✕</button><h3>Editar Entrada</h3>
+  <input type="hidden" id="editDiaryId">
+  <div class="fGrp" style="margin-bottom:.6rem"><label>Dia</label><input type="text" id="editDDay"></div>
+  <div class="fGrp" style="margin-bottom:.6rem"><label>Título</label><input type="text" id="editDTitle"></div>
+  <div class="fGrp" style="margin-bottom:.8rem"><label>Texto</label><textarea id="editDBody" style="min-height:120px"></textarea></div>
+  <button class="btn btnRed" onclick="saveEditDiary()">Salvar</button>
+</div></div>
+
+<div class="mOv" id="mEditFicha"><div class="modal" style="max-width:440px;width:90vw">
+  <button class="mClose" onclick="closeM('mEditFicha')">✕</button><h3>Editar Ficha</h3>
+  <input type="hidden" id="eFichaId">
+  <div class="fRow"><div class="fGrp"><label>Nome</label><input type="text" id="eFichaNome"></div><div class="fGrp" style="max-width:80px"><label>HP Máx</label><input type="number" id="eFichaHp"></div><div class="fGrp" style="max-width:68px"><label>AC</label><input type="number" id="eFichaAc"></div><div class="fGrp" style="max-width:85px"><label>Init. Bonus</label><input type="number" id="eFichaInitBonus"></div></div>
+  <div class="fGrp" style="margin-bottom:.6rem"><label>Tipo</label><input type="text" id="eFichaTipo"></div>
+  <label class="ulabel" for="eFichaImg">⬡ Trocar imagem</label><input type="file" id="eFichaImg" accept="image/*">
+  <div id="eFichaPreview" style="margin-top:.6rem;text-align:center"></div>
+  <div style="text-align:right;margin-top:.9rem"><button class="btn btnRed" onclick="saveEditFicha()">Salvar</button></div>
+</div></div>
+
+<div class="mOv" id="mEditCreature"><div class="modal" style="max-width:440px;width:90vw">
+  <button class="mClose" onclick="closeM('mEditCreature')">✕</button><h3>Editar Criatura</h3>
+  <input type="hidden" id="eCrId">
+  <div class="fRow"><div class="fGrp"><label>Nome</label><input type="text" id="eCrNome"></div><div class="fGrp" style="max-width:75px"><label>Iniciativa</label><input type="number" id="eCrInit"></div></div>
+  <div class="fRow"><div class="fGrp" style="max-width:88px"><label>HP Atual</label><input type="number" id="eCrHp"></div><div class="fGrp" style="max-width:88px"><label>HP Máx</label><input type="number" id="eCrHpMax"></div><div class="fGrp" style="max-width:72px"><label>AC</label><input type="number" id="eCrAc"></div><div class="fGrp"><label>Ficha</label><select id="eCrFicha"></select></div></div>
+  <div style="text-align:right;margin-top:.9rem"><button class="btn btnRed" onclick="saveEditCreature()">Salvar</button></div>
+</div></div>
+
+<div class="mOv" id="mNewCamp"><div class="modal" style="max-width:380px;width:90vw">
+  <button class="mClose" onclick="closeM('mNewCamp')">✕</button><h3>Nova Campanha</h3>
+  <div class="fGrp" style="margin-bottom:.8rem"><label>Nome</label><input type="text" id="newCampName" placeholder="Ex: A Maldição de Salthar"></div>
+  <button class="btn btnRed" onclick="createCamp()">+ Criar</button>
+</div></div>
+
+<div class="mOv" id="mRenameCamp"><div class="modal" style="max-width:380px;width:90vw">
+  <button class="mClose" onclick="closeM('mRenameCamp')">✕</button><h3>Renomear Campanha</h3>
+  <div class="fGrp" style="margin-bottom:.8rem"><label>Novo Nome</label><input type="text" id="renameCampInput"></div>
+  <button class="btn btnRed" onclick="renameCamp()">Salvar</button>
+</div></div>
+
+<div class="mOv" id="mConfirmDeleteCamp"><div class="modal" style="max-width:400px;width:90vw;text-align:center">
+  <h3 style="color:var(--red);margin-bottom:.7rem">⚠ Apagar Campanha</h3>
+  <p id="confirmDeleteCampMsg" style="font-family:var(--fB);font-size:.95rem;margin-bottom:1.2rem;line-height:1.6"></p>
+  <div style="display:flex;gap:.7rem;justify-content:center">
+    <button class="btn btnOut" onclick="closeM('mConfirmDeleteCamp')">Cancelar</button>
+    <button class="btn btnDng" onclick="confirmDeleteCamp()">Sim, apagar</button>
+  </div>
+</div></div>
+
+<div class="mOv" id="mCustomStatus"><div class="modal" style="max-width:380px;width:90vw">
+  <button class="mClose" onclick="cancelCustomStatus()">✕</button>
+  <h3>Nome do Status</h3>
+  <div class="fGrp" style="margin-bottom:.8rem"><label>Digite o nome</label><input type="text" id="customStatusInput" placeholder="Ex: Marcado, Amaldiçoado..."></div>
+  <button class="btn btnRed" onclick="confirmCustomStatus()">✔ Confirmar</button>
+</div></div>
+
+<div class="mOv" id="mParty"><div class="modal" style="min-width:300px;max-width:500px;width:90vw">
+  <button class="mClose" onclick="closeM('mParty')">✕</button><h3>Configurar Party</h3>
+  <p style="font-family:var(--fB);font-size:.88rem;color:var(--muted);margin-bottom:.8rem;font-style:italic">Entram automaticamente em Novo Combate.</p>
+  <div id="partyList"></div>
+  <div style="border-top:1px solid var(--border);margin-top:.8rem;padding-top:.8rem">
+    <div class="fRow" style="margin-bottom:.5rem"><div class="fGrp"><label>Vincular Personagem</label><select id="pmPJLink" onchange="autofillPartyFromPJ()"></select></div></div>
+    <div class="fRow">
+      <div class="fGrp"><label>Nome</label><input type="text" id="pmNome" placeholder="Ex: Aldric"></div>
+      <div class="fGrp" style="max-width:80px"><label>HP Máx</label><input type="number" id="pmHp"></div>
+      <div class="fGrp" style="max-width:68px"><label>AC</label><input type="number" id="pmAc"></div>
+      <div class="fGrp" style="max-width:90px;justify-content:flex-end"><button class="btn btnRed" onclick="addPartyMember()">+ Add</button></div>
+    </div>
+  </div>
+  <div style="text-align:right;margin-top:.5rem"><button class="btn btnRed" onclick="saveParty()">✔ Salvar Party</button></div>
+</div></div>
+
+<div class="mOv" id="mNewCombat"><div class="modal" style="min-width:300px;max-width:460px;width:90vw">
+  <button class="mClose" onclick="closeM('mNewCombat')">✕</button><h3>Novo Combate</h3>
+  <p style="font-family:var(--fB);font-size:.88rem;color:var(--muted);margin-bottom:.8rem;font-style:italic">Iniciativas da party:</p>
+  <div id="newCombatList"></div>
+  <div style="text-align:right;margin-top:.8rem"><button class="btn btnRed" onclick="startNewCombat()">▶ Iniciar</button></div>
+</div></div>
+
+<div class="mOv" id="mEditPJ"><div class="modal" style="max-width:520px;width:90vw">
+  <button class="mClose" onclick="closeM('mEditPJ')">✕</button><h3>Editar Personagem</h3>
+  <input type="hidden" id="epj_id">
+  <div class="fRow">
+    <div class="fGrp"><label>Nome</label><input type="text" id="epj_nome"></div>
+    <div class="fGrp" style="max-width:82px"><label>HP Máx</label><input type="number" id="epj_hp"></div>
+    <div class="fGrp" style="max-width:68px"><label>AC</label><input type="number" id="epj_ac"></div>
+  </div>
+  <div class="fRow">
+    <div class="fGrp"><label>Classe</label><input type="text" id="epj_classe"></div>
+    <div class="fGrp" style="max-width:90px"><label>Passive Perc.</label><input type="number" id="epj_pp"></div>
+    <div class="fGrp" style="max-width:85px"><label>Cristais</label><input type="number" id="epj_cristais" min="0"></div>
+  </div>
+  <div style="margin-bottom:.7rem">
+    <label style="display:block;margin-bottom:.35rem">Itens Attunados <span style="font-family:var(--fN);font-size:.68rem;color:var(--muted)">(opcionais)</span></label>
+    <div class="atRow"><select id="epj_at1s"></select><span class="atOr">ou</span><input type="text" id="epj_at1t" placeholder="manual"></div>
+    <div class="atRow"><select id="epj_at2s"></select><span class="atOr">ou</span><input type="text" id="epj_at2t" placeholder="manual"></div>
+    <div class="atRow"><select id="epj_at3s"></select><span class="atOr">ou</span><input type="text" id="epj_at3t" placeholder="manual"></div>
+  </div>
+  <label class="ulabel" for="epj_img">⬡ Trocar imagem (opcional)</label>
+  <input type="file" id="epj_img" accept="image/*">
+  <div id="epj_preview" style="margin-top:.6rem;text-align:center"></div>
+  <div class="fGrp" style="margin-top:.7rem"><label>Background</label><textarea id="epj_bg" style="min-height:120px"></textarea></div>
+  <div style="text-align:right;margin-top:.9rem"><button class="btn btnRed" onclick="saveEditPJ()">Salvar</button></div>
+</div></div>
+
+<div class="mOv" id="mEditItem"><div class="modal" style="max-width:460px;width:90vw">
+  <button class="mClose" onclick="closeM('mEditItem')">✕</button><h3>Editar Item</h3>
+  <input type="hidden" id="eItId">
+  <div class="fRow"><div class="fGrp"><label>Nome</label><input type="text" id="eItNome"></div><div class="fGrp" style="max-width:140px"><label>Tipo</label><input type="text" id="eItTipo"></div></div>
+  <div class="fRow">
+    <div class="fGrp"><label>Raridade</label><select id="eItRar"><option value="">— selecione —</option><option>Uncommon</option><option>Rare</option><option>Very Rare</option><option>Legendary</option><option>Artifact</option></select></div>
+    <div class="fGrp" style="max-width:120px"><label>Attunamento</label><select id="eItAttune"><option value="no">Não</option><option value="yes">Sim</option></select></div>
+  </div>
+  <label class="ulabel" for="eItImg">⬡ Trocar imagem</label><input type="file" id="eItImg" accept="image/*">
+  <div id="eItPreview" style="margin-top:.6rem;text-align:center"></div>
+  <div class="fGrp" style="margin-top:.7rem"><label>Descrição</label><textarea id="eItDesc" style="min-height:90px"></textarea></div>
+  <div style="text-align:right;margin-top:.9rem"><button class="btn btnRed" onclick="saveEditItem()">Salvar</button></div>
+</div></div>
+
+<script>
+const CONDS=[
+  {k:'Concentrating',l:'Concentrating',c:true,d:'Requires mental focus. Ends if you cast another concentration spell, take damage, or become incapacitated.'},
+  {k:'Blinded',l:'Blinded',d:"Can't see; fail sight checks; disadvantage on attacks; attacks against you have advantage."},
+  {k:'Charmed',l:'Charmed',d:"Can't attack charmer; charmer has advantage on social checks against you."},
+  {k:'Deafened',l:'Deafened',d:"Can't hear; auto-fail hearing checks."},
+  {k:'Exhaustion',l:'Exhaustion',d:'1–6 scale. Each level: d20 −2×level, speed −5ft×level. Long Rest −1. Level 6 = death.'},
+  {k:'Frightened',l:'Frightened',d:"Disadvantage on checks/attacks while source visible. Can't move closer."},
+  {k:'Grappled',l:'Grappled',d:"Speed 0; no speed bonuses."},
+  {k:'Incapacitated',l:'Incapacitated',d:"No actions, bonus actions, or reactions."},
+  {k:'Invisible',l:'Invisible',d:"Can't be seen without magic. Advantage on attacks; attackers disadvantaged."},
+  {k:'Paralyzed',l:'Paralyzed',d:"Incapacitated, can't move/speak. Auto-fail Str/Dex. Adjacent hits crit."},
+  {k:'Petrified',l:'Petrified',d:'Turned to stone. Incapacitated, speed 0, resist all damage, immune poison/disease.'},
+  {k:'Poisoned',l:'Poisoned',d:'Disadvantage on attack rolls and ability checks.'},
+  {k:'Prone',l:'Prone',d:'Can only crawl. Disadvantage on attacks. Attacks adv if attacker within 5ft.'},
+  {k:'Restrained',l:'Restrained',d:"Speed 0. Attacks against you adv. Your attacks disadv. Dex saves disadv."},
+  {k:'Stunned',l:'Stunned',d:"Incapacitated, can't move, speak falteringly. Auto-fail Str/Dex. Attacks adv."},
+  {k:'Unconscious',l:'Unconscious',d:"Incapacitated, unaware, drops items, falls prone. Auto-fail Str/Dex. Adjacent hits crit."},
+  {k:'Outros',l:'Outros',custom:true,d:''}
+];
+const RAR_ORDER=['Uncommon','Rare','Very Rare','Legendary','Artifact'];
+const RAR_COLORS={Uncommon:'#1a6b2a',Rare:'#1a3a6b','Very Rare':'#5b2d8e',Legendary:'#b8860b',Artifact:'#8b0000'};
+const RAR_BG={Uncommon:'#e8f5e8',Rare:'#ddeeff','Very Rare':'#ede0ff',Legendary:'#fff3cd',Artifact:'#fde8e8'};
+
+let campaigns=[],activeId=null,hpTgt=null,dDragSrc=null,fDragSrc=null,pjDragSrc=null,itDragSrc=null,_customStatusCtx=null;
+
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+
+let _db=null;
+function openDB(){return new Promise((res,rej)=>{if(_db){res(_db);return;}const req=indexedDB.open('CompanheiroMestre',1);req.onupgradeneeded=e=>e.target.result.createObjectStore('kv');req.onsuccess=e=>{_db=e.target.result;res(_db);};req.onerror=rej;});}
+function idbSet(k,v){return openDB().then(db=>new Promise((res,rej)=>{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=res;tx.onerror=rej;}));}
+function idbGet(k){return openDB().then(db=>new Promise((res,rej)=>{const tx=db.transaction('kv','readonly');const req=tx.objectStore('kv').get(k);req.onsuccess=e=>res(e.target.result);req.onerror=rej;}));}
+
+function persist(){
+  const data=JSON.stringify({campaigns,activeId});
+  idbSet('nc_data',data).catch(function(){});
+  try{localStorage.setItem('nc_data',data);}catch(e){}
+}
+async function loadStorage(){
+  try{const raw=await idbGet('nc_data');if(raw){const d=JSON.parse(raw);if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;return;}}}catch(e){}
+  try{const raw=localStorage.getItem('nc_data');if(raw){const d=JSON.parse(raw);if(d.campaigns&&d.campaigns.length){campaigns=d.campaigns;activeId=d.activeId;return;}}}catch(e){}
+}
+function ensureDefaults(){
+  if(!campaigns.length){const id='c'+Date.now();campaigns=[{id:id,name:'Campanha Principal',diary:[],fichas:[],party:[],creatures:[],personagens:[],itens:[],currentTurn:-1}];activeId=id;}
+  if(!activeId||!campaigns.find(function(c){return c.id===activeId;}))activeId=campaigns[0].id;
+  campaigns.forEach(function(c){
+    if(!c.diary)c.diary=[];
+    if(!c.fichas)c.fichas=[];
+    if(!c.party)c.party=[];
+    if(!c.creatures)c.creatures=[];
+    if(!c.personagens)c.personagens=[];
+    if(!c.itens)c.itens=[];
+    if(c.currentTurn===undefined)c.currentTurn=-1;
+  });
+}
+function AC(){
+  const c=campaigns.find(function(x){return x.id===activeId;});
+  if(!c&&campaigns.length){activeId=campaigns[0].id;return campaigns[0];}
+  return c;
+}
+
+function exportData(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({campaigns:campaigns,activeId:activeId},null,2));a.download='companheiro_backup.json';a.click();}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const d=JSON.parse(ev.target.result);if(d.campaigns){campaigns=d.campaigns;activeId=d.activeId||d.campaigns[0].id;}ensureDefaults();persist();renderAll();alert('Importado!');}catch(err){alert('Arquivo inválido.');}};r.readAsText(f);e.target.value='';}
+
+function renderCampSel(){const s=document.getElementById('campSel');s.innerHTML=campaigns.map(function(c){return'<option value="'+c.id+'"'+(c.id===activeId?' selected':'')+'>'+c.name+'</option>';}).join('');}
+function switchCamp(){activeId=document.getElementById('campSel').value;document.getElementById('diarySearch').value='';persist();renderAll();}
+function openRenameCamp(){document.getElementById('renameCampInput').value=AC().name;openM('mRenameCamp');}
+function renameCamp(){const n=document.getElementById('renameCampInput').value.trim();if(!n)return;AC().name=n;closeM('mRenameCamp');persist();renderCampSel();}
+function createCamp(){const n=document.getElementById('newCampName').value.trim();if(!n)return alert('Digite o nome!');const id='c'+Date.now();campaigns.push({id:id,name:n,diary:[],fichas:[],party:[],creatures:[],personagens:[],itens:[],currentTurn:-1});activeId=id;closeM('mNewCamp');persist();renderCampSel();renderAll();}
+function deleteCamp(){const s=document.getElementById('campSel');if(s)activeId=s.value;if(campaigns.length<=1){alert('Não é possível apagar a única campanha.');return;}const c=campaigns.find(function(c){return c.id===activeId;});if(!c)return;document.getElementById('confirmDeleteCampMsg').textContent='Deseja apagar "'+c.name+'"? Todos os dados serão perdidos.';openM('mConfirmDeleteCamp');}
+function confirmDeleteCamp(){campaigns=campaigns.filter(function(c){return c.id!==activeId;});activeId=campaigns[0].id;closeM('mConfirmDeleteCamp');persist();renderCampSel();renderAll();}
+
+function showSec(id,btn){
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+function renderAll(){renderCampSel();renderCreatures();renderDiary();renderFichas();refreshFichaSelect();refreshTypeFilter();renderPJs();refreshPJSelectInParty();renderItens();refreshItTypeFilter();}
+
+function isParty(name){return AC().party.some(function(p){return p.name===name;});}
+function autofillFicha(){
+  const id=document.getElementById('cFichaLink').value;
+  const hint=document.getElementById('cInitBonusHint');
+  if(!id){hint.style.display='none';return;}
+  const f=AC().fichas.find(function(f){return String(f.id)===String(id);});
+  if(!f){hint.style.display='none';return;}
+  document.getElementById('cName').value=f.name;
+  if(f.hpMax)document.getElementById('cHpMax').value=f.hpMax;
+  if(f.ac)document.getElementById('cAc').value=f.ac;
+  if(f.initBonus!=null){
+    hint.textContent='Init. Bonus desta ficha: '+(f.initBonus>=0?'+':'')+f.initBonus+' (some manualmente ao definir a iniciativa)';
+    hint.style.display='block';
+  }else{
+    hint.style.display='none';
+  }
+}
+function addCreature(){
+  const name=document.getElementById('cName').value.trim();if(!name){alert('Digite o nome!');return;}
+  const init=parseInt(document.getElementById('cInit').value)||0;
+  const hp=parseInt(document.getElementById('cHpMax').value)||1;
+  const ac=parseInt(document.getElementById('cAc').value)||null;
+  const fichaId=document.getElementById('cFichaLink').value;
+  AC().creatures.push({id:Date.now(),name:name,init:init,initReal:init,hp:hp,hpMax:hp,ac:ac,fichaId:fichaId,dead:false,conditions:[]});
+  AC().creatures.sort(function(a,b){return(b.initReal||b.init)-(a.initReal||a.init);});
+  ['cName','cInit','cHpMax','cAc'].forEach(function(i){document.getElementById(i).value='';});
+  document.getElementById('cFichaLink').value='';
+  document.getElementById('cInitBonusHint').style.display='none';
+  AC().currentTurn=-1;persist();renderCreatures();
+}
+function moveCreature(id,dir){
+  const camp=AC();
+  const idx=camp.creatures.findIndex(function(c){return c.id===id;});
+  const ni=idx+dir;
+  if(ni<0||ni>=camp.creatures.length)return;
+  const tmp=camp.creatures[idx];camp.creatures[idx]=camp.creatures[ni];camp.creatures[ni]=tmp;
+  persist();renderCreatures();
+}
+function renderCreatures(){
+  const camp=AC();const el=document.getElementById('creatureList');
+  if(!camp.creatures.length){el.innerHTML='<div class="empty">Nenhuma criatura.</div>';document.getElementById('tBanner').style.display='none';return;}
+  if(camp.currentTurn>=0&&camp.currentTurn<camp.creatures.length){
+    const b=document.getElementById('tBanner');b.style.display='block';
+    b.textContent='Turno de: '+camp.creatures[camp.currentTurn].name+' (Init '+camp.creatures[camp.currentTurn].init+')';
+  }else{document.getElementById('tBanner').style.display='none';}
+  const rows=[];let d20=false,d10=false;
+  camp.creatures.forEach(function(c,i){
+    if(!d20&&c.init<20){rows.push({div:'20'});d20=true;}
+    if(!d10&&c.init<10){rows.push({div:'10'});d10=true;}
+    rows.push({c:c,i:i});
+  });
+  if(!d20)rows.unshift({div:'20'});
+  if(!d10){const ix=rows.findIndex(function(r){return r.div==='20';});rows.splice(ix+1,0,{div:'10'});}
+  el.innerHTML=rows.map(function(row){
+    if(row.div)return'<div class="divLine"><hr><span>⬡ Init '+row.div+'</span><hr></div>';
+    const c=row.c,i=row.i;
+    const over=c.hp>c.hpMax,pct=over?100:Math.max(0,Math.round(c.hp/c.hpMax*100));
+    const hpC=over?'#1a6b8a':pct>50?'#2d6e2d':pct>25?'#9a7000':'#8b0000';
+    const ip=isParty(c.name);
+    const bg=ip?'#2d6e2d':'#8b0000',bd=ip?'#1a4d1a':'#5c0000',tc=ip?'#e8f5e8':'#fff0f0';
+    const conds=c.conditions||[];
+    const checks=CONDS.map(function(cd){return'<label class="sdOpt"><input type="checkbox"'+(conds.includes(cd.k)?' checked':'')+' onchange="onCondCheckboxChange('+c.id+',&#39;'+cd.k+'&#39;,this)"><span>'+cd.l+'</span></label>';}).join('');
+    const pills=conds.map(function(k){
+      const cd=CONDS.find(function(x){return x.k===k;});
+      if(!cd)return'';
+      if(cd.custom){
+        const label=(c.customConditionLabel&&c.customConditionLabel[k])||'Outros';
+        return'<span class="sPill other" onclick="removeCond('+c.id+',&#39;'+k+'&#39;)">'+label+'</span>';
+      }
+      return'<span class="sPill '+(cd.c?'conc':'other')+'" onclick="removeCond('+c.id+',&#39;'+k+'&#39;)" onmouseenter="posTip(event,this)" onmouseleave="hideTip(this)">'+cd.l+'<span class="tip">'+cd.d+'</span></span>';
+    }).join('');
+    const fn=c.fichaId?(camp.fichas.find(function(f){return String(f.id)===String(c.fichaId);})||{}).name:'';
+    return'<div class="cRow'+(i===camp.currentTurn?' aTurn':'')+(c.dead?' dead':'')+'">'+
+      '<div class="iBadge" style="background:'+bg+';border-color:'+bd+';color:'+tc+'">'+c.init+'</div>'+
+      '<div style="flex:1;min-width:70px">'+
+        '<div class="cName" onclick="openFichaFromCreature('+c.id+')">'+c.name+(fn?'<br><span style="font-size:.65rem;color:var(--muted);font-style:italic">'+fn+'</span>':'')+'</div>'+
+        (pills?'<div class="sPills">'+pills+'</div>':'')+
+      '</div>'+
+      '<div class="hpArea">'+
+        '<button class="btn sm" style="min-width:28px;background:#5b2d8e;border-color:#3d1a6e;color:#e8d4ff;font-size:1rem;padding:.26rem .48rem" onclick="openHpM('+c.id+')">✚</button>'+
+        '<div><div class="hpVal">'+(c.dead?'Morto':c.hp+'/'+c.hpMax)+(over?' ✨':'')+'</div><div class="hpWrap"><div class="hpBar" style="width:'+pct+'%;background:'+hpC+'"></div></div></div>'+
+      '</div>'+
+      (c.ac?'<div class="acVal">AC '+c.ac+'</div>':'')+
+      '<div class="sdWrap"><button class="sdBtn" onclick="toggleSD('+c.id+')">Status ▾</button><div class="sdMenu" id="sd_'+c.id+'">'+checks+'</div></div>'+
+      (i===camp.currentTurn?'<div class="tInd">⬡ Agindo</div>':'')+
+      '<button class="btn sm btnOut" onclick="openEditCreature('+c.id+')">✏</button>'+
+      '<button class="btn sm btnOut" style="padding:.24rem .4rem" onclick="moveCreature('+c.id+',-1)">↑</button>'+
+      '<button class="btn sm btnOut" style="padding:.24rem .4rem" onclick="moveCreature('+c.id+',1)">↓</button>'+
+      '<button class="btn sm btnDng" onclick="removeCreature('+c.id+')">✕</button>'+
+    '</div>';
+  }).join('');
+}
+function toggleSD(id){document.querySelectorAll('.sdMenu').forEach(function(d){if(d.id!=='sd_'+id)d.classList.remove('open');});const m=document.getElementById('sd_'+id);if(m)m.classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.sdWrap'))document.querySelectorAll('.sdMenu').forEach(function(d){d.classList.remove('open');});});
+
+function onCondCheckboxChange(cid,k,checkboxEl){
+  const checked=checkboxEl.checked;
+  if(k==='Outros'&&checked){
+    _customStatusCtx={cid:cid};
+    document.getElementById('customStatusInput').value='';
+    openM('mCustomStatus');
+    setTimeout(function(){const inp=document.getElementById('customStatusInput');if(inp)inp.focus();},150);
+    return;
+  }
+  toggleCond(cid,k,checked);
+}
+function toggleCond(cid,k,on){
+  const c=AC().creatures.find(function(c){return c.id===cid;});if(!c)return;
+  if(!c.conditions)c.conditions=[];
+  if(on){if(!c.conditions.includes(k))c.conditions.push(k);}
+  else{c.conditions=c.conditions.filter(function(x){return x!==k;});}
+  persist();renderCreatures();
+  setTimeout(function(){const m=document.getElementById('sd_'+cid);if(m)m.classList.add('open');},10);
+}
+function confirmCustomStatus(){
+  if(!_customStatusCtx)return;
+  const label=document.getElementById('customStatusInput').value.trim();
+  if(!label){closeM('mCustomStatus');return;}
+  const c=AC().creatures.find(function(c){return c.id===_customStatusCtx.cid;});
+  if(c){
+    if(!c.conditions)c.conditions=[];
+    if(!c.conditions.includes('Outros'))c.conditions.push('Outros');
+    if(!c.customConditionLabel)c.customConditionLabel={};
+    c.customConditionLabel['Outros']=label;
+    persist();renderCreatures();
+  }
+  closeM('mCustomStatus');
+  _customStatusCtx=null;
+}
+function cancelCustomStatus(){closeM('mCustomStatus');_customStatusCtx=null;renderCreatures();}
+function removeCond(cid,k){const c=AC().creatures.find(function(c){return c.id===cid;});if(!c)return;c.conditions=(c.conditions||[]).filter(function(x){return x!==k;});persist();renderCreatures();}
+function posTip(e,el){const t=el.querySelector('.tip');if(!t)return;const r=el.getBoundingClientRect();t.style.top=(r.bottom+6)+'px';t.style.left=Math.min(r.left,window.innerWidth-280)+'px';}
+function hideTip(el){const t=el.querySelector('.tip');if(t){t.style.top='';t.style.left='';}}
+function openHpM(id){hpTgt={id:id};const c=AC().creatures.find(function(c){return c.id===id;});document.getElementById('mHpTitle').textContent='Alterar HP — '+c.name;document.getElementById('mHpAmt').value='';openM('mHp');setTimeout(function(){document.getElementById('mHpAmt').focus();},80);}
+function applyHp(type){hpTgt.lastType=type;const amt=parseInt(document.getElementById('mHpAmt').value)||0;if(amt<=0)return;const c=AC().creatures.find(function(c){return c.id===hpTgt.id;});if(!c)return;if(type==='dmg'){c.hp=Math.max(0,c.hp-amt);if(c.hp===0)c.dead=true;}else{c.hp+=amt;if(c.hp>0)c.dead=false;}closeM('mHp');persist();renderCreatures();}
+function nextTurn(){const camp=AC();if(!camp.creatures.length)return;const alive=camp.creatures.filter(function(c){return!c.dead;});if(!alive.length)return;if(camp.currentTurn===-1){camp.currentTurn=0;}else{let n=camp.currentTurn+1;while(n<camp.creatures.length&&camp.creatures[n].dead)n++;if(n>=camp.creatures.length){n=0;while(n<camp.creatures.length&&camp.creatures[n].dead)n++;}camp.currentTurn=n;}persist();renderCreatures();}
+function resetTurns(){AC().currentTurn=-1;document.getElementById('tBanner').style.display='none';persist();renderCreatures();}
+function removeCreature(id){const camp=AC();camp.creatures=camp.creatures.filter(function(c){return c.id!==id;});if(camp.currentTurn>=camp.creatures.length)camp.currentTurn=camp.creatures.length-1;persist();renderCreatures();}
+function refreshFichaSelect(){const s=document.getElementById('cFichaLink');s.innerHTML='<option value="">— nenhuma —</option>'+AC().fichas.map(function(f){return'<option value="'+f.id+'">'+f.name+'</option>';}).join('');}
+function openFichaFromCreature(cid){
+  const camp=AC();const c=camp.creatures.find(function(c){return c.id===cid;});if(!c)return;
+  const pj=(camp.personagens||[]).find(function(p){return p.name===c.name;});
+  if(pj){openGenPopup(pj.name,pj.img||null);return;}
+  document.getElementById('fpName').textContent=c.name;
+  const f=c.fichaId?camp.fichas.find(function(f){return String(f.id)===String(c.fichaId);}):null;
+  const img=document.getElementById('fpImg'),noImg=document.getElementById('fpNoImg');
+  if(f&&f.img){img.src=f.img;img.style.display='block';noImg.style.display='none';}else{img.style.display='none';noImg.style.display='block';}
+  openM('mFichaPopup');
+}
+function openEditCreature(id){
+  const camp=AC();const c=camp.creatures.find(function(c){return c.id===id;});if(!c)return;
+  document.getElementById('eCrId').value=id;
+  document.getElementById('eCrNome').value=c.name;
+  document.getElementById('eCrInit').value=c.init;
+  document.getElementById('eCrHp').value=c.hp;
+  document.getElementById('eCrHpMax').value=c.hpMax;
+  document.getElementById('eCrAc').value=c.ac||'';
+  const s=document.getElementById('eCrFicha');
+  s.innerHTML='<option value="">— nenhuma —</option>'+camp.fichas.map(function(f){return'<option value="'+f.id+'"'+(String(c.fichaId)===String(f.id)?' selected':'')+'>'+f.name+'</option>';}).join('');
+  openM('mEditCreature');
+}
+function saveEditCreature(){
+  const id=parseInt(document.getElementById('eCrId').value);
+  const camp=AC();const c=camp.creatures.find(function(c){return c.id===id;});if(!c)return;
+  c.name=document.getElementById('eCrNome').value.trim()||c.name;
+  const ni=parseInt(document.getElementById('eCrInit').value);
+  if(!isNaN(ni)){c.init=ni;c.initReal=ni;}
+  c.hp=parseInt(document.getElementById('eCrHp').value);
+  c.hpMax=parseInt(document.getElementById('eCrHpMax').value)||c.hpMax;
+  c.ac=parseInt(document.getElementById('eCrAc').value)||null;
+  c.fichaId=document.getElementById('eCrFicha').value;
+  c.dead=c.hp<=0;
+  camp.creatures.sort(function(a,b){return(b.initReal||b.init)-(a.initReal||a.init);});
+  closeM('mEditCreature');persist();renderCreatures();
+}
+
+function refreshPJSelectInParty(){const s=document.getElementById('pmPJLink');if(!s)return;const pjs=AC().personagens||[];s.innerHTML='<option value="">— ou preencha manualmente —</option>'+pjs.map(function(p){return'<option value="'+p.id+'">'+p.name+'</option>';}).join('');}
+function autofillPartyFromPJ(){const id=document.getElementById('pmPJLink').value;if(!id)return;const p=(AC().personagens||[]).find(function(p){return String(p.id)===String(id);});if(!p)return;document.getElementById('pmNome').value=p.name;if(p.hpMax)document.getElementById('pmHp').value=p.hpMax;if(p.ac)document.getElementById('pmAc').value=p.ac;}
+function openPartyConfig(){renderPartyList();refreshPJSelectInParty();openM('mParty');}
+function renderPartyList(){
+  const p=AC().party,el=document.getElementById('partyList');
+  if(!p.length){el.innerHTML='<div class="empty" style="padding:.5rem">Nenhum membro.</div>';return;}
+  el.innerHTML=p.map(function(m,i){
+    return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:3px;margin-bottom:.4rem;padding:.5rem .6rem">'+
+      '<div style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:.35rem;align-items:center">'+
+        '<span style="font-family:var(--fH);font-weight:600;color:var(--red);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+m.name+'</span>'+
+        '<span style="font-family:var(--fN);color:var(--muted);font-size:.78rem">HP:'+m.hpMax+'</span>'+
+        (m.ac?'<span style="font-family:var(--fN);color:var(--muted);font-size:.78rem">AC:'+m.ac+'</span>':'<span></span>')+
+        '<button onclick="togglePMEdit('+i+')" style="font-family:var(--fH);font-weight:600;font-size:.72rem;padding:.24rem .48rem;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:3px;cursor:pointer">✏</button>'+
+        '<button onclick="removePartyMember('+i+')" style="font-family:var(--fH);font-weight:600;font-size:.72rem;padding:.24rem .48rem;border:1px solid #a00;background:#8b0000;color:#ffc8c8;border-radius:3px;cursor:pointer">✕</button>'+
+      '</div>'+
+      '<div id="pmedit_'+i+'" style="display:none;flex-wrap:wrap;gap:.4rem;align-items:flex-end;margin-top:.5rem;padding:.5rem;background:var(--bg2);border-radius:3px">'+
+        '<div style="display:flex;flex-direction:column;gap:.2rem;flex:1;min-width:80px"><span style="font-family:var(--fN);font-size:.68rem;color:var(--muted);font-weight:600;text-transform:uppercase">Nome</span><input type="text" id="pme_n_'+i+'" value="'+m.name+'" style="background:var(--light);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem;width:100%"></div>'+
+        '<div style="display:flex;flex-direction:column;gap:.2rem;width:70px"><span style="font-family:var(--fN);font-size:.68rem;color:var(--muted);font-weight:600;text-transform:uppercase">HP</span><input type="number" id="pme_h_'+i+'" value="'+m.hpMax+'" style="background:var(--light);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem;width:100%"></div>'+
+        '<div style="display:flex;flex-direction:column;gap:.2rem;width:60px"><span style="font-family:var(--fN);font-size:.68rem;color:var(--muted);font-weight:600;text-transform:uppercase">AC</span><input type="number" id="pme_a_'+i+'" value="'+(m.ac||'')+'" style="background:var(--light);border:1px solid var(--border);color:var(--ink);padding:.38rem .6rem;border-radius:3px;font-size:.9rem;width:100%"></div>'+
+        '<div style="display:flex;gap:.3rem;align-self:flex-end">'+
+          '<button onclick="savePMEdit('+i+')" style="font-family:var(--fH);font-weight:600;font-size:.72rem;padding:.3rem .6rem;border:1px solid var(--border2);background:var(--red);color:#fff;border-radius:3px;cursor:pointer">✔</button>'+
+          '<button onclick="togglePMEdit('+i+')" style="font-family:var(--fH);font-weight:600;font-size:.72rem;padding:.3rem .6rem;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:3px;cursor:pointer">✕</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function togglePMEdit(i){AC().party.forEach(function(_,j){if(j!==i){const d=document.getElementById('pmedit_'+j);if(d)d.style.display='none';}});const e=document.getElementById('pmedit_'+i);if(e)e.style.display=e.style.display==='flex'?'none':'flex';}
+function savePMEdit(i){const n=document.getElementById('pme_n_'+i).value.trim();const h=parseInt(document.getElementById('pme_h_'+i).value)||1;const a=parseInt(document.getElementById('pme_a_'+i).value)||null;if(!n)return;AC().party[i]={name:n,hpMax:h,ac:a};renderPartyList();}
+function addPartyMember(){const n=document.getElementById('pmNome').value.trim();const h=parseInt(document.getElementById('pmHp').value)||1;const a=parseInt(document.getElementById('pmAc').value)||null;if(!n){alert('Digite o nome!');return;}AC().party.push({name:n,hpMax:h,ac:a});document.getElementById('pmNome').value='';document.getElementById('pmHp').value='';document.getElementById('pmAc').value='';document.getElementById('pmPJLink').value='';renderPartyList();}
+function removePartyMember(i){AC().party.splice(i,1);renderPartyList();}
+function saveParty(){persist();closeM('mParty');alert('Party salva!');}
+function openNewCombat(){
+  const p=AC().party;
+  if(!p.length){if(confirm('Limpar criaturas e começar?')){const c=AC();c.creatures=[];c.currentTurn=-1;persist();renderCreatures();}return;}
+  document.getElementById('newCombatList').innerHTML=p.map(function(m,i){
+    return '<div style="display:flex;align-items:center;gap:.65rem;padding:.48rem .7rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;margin-bottom:.4rem"><div style="flex:1;font-family:var(--fH);font-weight:600;color:var(--red)">'+m.name+'<br><span style="font-family:var(--fN);font-size:.72rem;color:var(--muted)">HP:'+m.hpMax+(m.ac?' · AC:'+m.ac:'')+'</span></div><div style="display:flex;flex-direction:column;gap:.2rem"><span style="font-family:var(--fN);font-size:.68rem;color:var(--muted);text-transform:uppercase;font-weight:600">Iniciativa</span><input type="number" id="nci_'+i+'" placeholder="0" style="width:70px;background:var(--light);border:1px solid var(--border);color:var(--ink);padding:.32rem .48rem;border-radius:3px;font-size:.9rem"></div></div>';
+  }).join('');
+  openM('mNewCombat');
+}
+function startNewCombat(){
+  const camp=AC();camp.creatures=[];camp.currentTurn=-1;
+  camp.party.forEach(function(m,i){
+    const init=parseInt(document.getElementById('nci_'+i).value)||0;
+    camp.creatures.push({id:Date.now()+i,name:m.name,init:init,initReal:init,hp:m.hpMax,hpMax:m.hpMax,ac:m.ac||null,fichaId:'',dead:false,conditions:[]});
+  });
+  camp.creatures.sort(function(a,b){return(b.initReal||b.init)-(a.initReal||a.init);});
+  closeM('mNewCombat');persist();renderCreatures();refreshFichaSelect();
+}
+
+function addDiaryEntry(){
+  const day=document.getElementById('dDay').value.trim();
+  const title=document.getElementById('dTitle').value.trim();
+  const body=document.getElementById('dBody').value.trim();
+  if(!body){alert('Descreva o que aconteceu!');return;}
+  AC().diary.unshift({id:Date.now(),day:day||'Dia Desconhecido',title:title||'Entrada sem título',body:body,date:new Date().toLocaleDateString('pt-BR')});
+  ['dDay','dTitle','dBody'].forEach(function(i){document.getElementById(i).value='';});
+  persist();renderDiary();
+}
+function sortDiary(o){const d=AC().diary;if(o==='oldest')d.reverse();else d.sort(function(a,b){return b.id-a.id;});persist();renderDiary();}
+function hl(t,s){if(!s)return t;return t.replace(new RegExp('('+s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark class="hl">$1</mark>');}
+function renderDiary(){
+  const el=document.getElementById('diaryList');
+  const term=(document.getElementById('diarySearch').value||'').trim().toLowerCase();
+  let entries=AC().diary.slice();
+  if(term)entries=entries.filter(function(e){return e.day.toLowerCase().includes(term)||e.title.toLowerCase().includes(term)||e.body.toLowerCase().includes(term);});
+  document.getElementById('searchCount').textContent=term?(entries.length+' resultado'+(entries.length!==1?'s':'')):'';
+  if(!entries.length){el.innerHTML=term?'<div class="empty">Sem resultados.</div>':'<div class="empty">O diário está em branco.</div>';return;}
+  el.innerHTML=entries.map(function(e){
+    return '<div class="dEntry" draggable="true" ondragstart="dDragStart(event,'+e.id+')" ondragover="dDragOver(event)" ondrop="dDrop(event,'+e.id+')" ondragleave="this.classList.remove(&#39;drag-over&#39;)">'+
+      '<div class="dHead" onclick="toggleDiary('+e.id+')"><span class="dragH" onclick="event.stopPropagation()">⠿</span><div style="flex:1"><div class="dDate">'+hl(e.day,term)+' · <span style="font-weight:400;opacity:.7">'+e.date+'</span></div><div class="dTitleT">'+hl(e.title,term)+'</div></div><span style="color:var(--border);font-size:.9rem">▾</span></div>'+
+      '<div class="dPrev" id="dprev_'+e.id+'"'+(term?' style="display:none"':'')+'>'+hl(e.body.substring(0,90)+(e.body.length>90?'…':''),term)+'</div>'+
+      '<div class="dBody'+(term?' open':'')+'" id="dbody_'+e.id+'"><hr style="border:none;border-top:1px solid var(--border);margin:.55rem 0"><div class="dBodyT">'+hl(e.body,term)+'</div><div class="dActs"><button class="btn btnOut sm" onclick="event.stopPropagation();openEditDiary('+e.id+')">✏ Editar</button><button class="btn btnDng sm" onclick="event.stopPropagation();deleteDiary('+e.id+')">✕ Apagar</button></div></div>'+
+    '</div>';
+  }).join('');
+}
+function toggleDiary(id){const b=document.getElementById('dbody_'+id),p=document.getElementById('dprev_'+id);if(!b)return;const o=b.classList.toggle('open');if(p)p.style.display=o?'none':'block';}
+function openEditDiary(id){const e=AC().diary.find(function(e){return e.id===id;});if(!e)return;document.getElementById('editDiaryId').value=id;document.getElementById('editDDay').value=e.day;document.getElementById('editDTitle').value=e.title;document.getElementById('editDBody').value=e.body;openM('mEditDiary');}
+function saveEditDiary(){const id=parseInt(document.getElementById('editDiaryId').value);const e=AC().diary.find(function(e){return e.id===id;});if(!e)return;e.day=document.getElementById('editDDay').value.trim()||e.day;e.title=document.getElementById('editDTitle').value.trim()||e.title;e.body=document.getElementById('editDBody').value.trim()||e.body;closeM('mEditDiary');persist();renderDiary();}
+function deleteDiary(id){AC().diary=AC().diary.filter(function(e){return e.id!==id;});persist();renderDiary();}
+function dDragStart(e,id){dDragSrc=id;e.target.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+function dDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
+function dDrop(e,tid){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(dDragSrc===tid)return;const d=AC().diary;const si=d.findIndex(function(x){return x.id===dDragSrc;}),ti=d.findIndex(function(x){return x.id===tid;});if(si<0||ti<0)return;const item=d.splice(si,1)[0];d.splice(ti,0,item);document.querySelectorAll('.dEntry').forEach(function(el){el.classList.remove('dragging');});persist();renderDiary();}
+
+function exportDiaryToWord(){
+  try{
+    const entries=AC().diary.slice().sort(function(a,b){return a.id-b.id;});
+    if(!entries.length){alert('O diário está vazio.');return;}
+    const campName=AC().name||'Campanha';
+    function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    const bodyParts=[];
+    for(let i=0;i<entries.length;i++){
+      const e=entries[i];
+      bodyParts.push(
+        '<div style="margin-bottom:36pt;">'+
+        '<h2 style="font-family:Georgia,serif;font-size:18pt;color:#8b0000;margin-bottom:2pt;">'+esc(e.day)+'</h2>'+
+        '<h3 style="font-family:Georgia,serif;font-size:14pt;color:#1a1008;margin-top:0;margin-bottom:10pt;font-style:italic;">'+esc(e.title)+' <span style="font-size:10pt;color:#777;font-style:normal;">('+esc(e.date)+')</span></h3>'+
+        '<p style="font-family:Georgia,serif;font-size:12pt;line-height:1.6;color:#1a1008;white-space:pre-wrap;">'+esc(e.body)+'</p>'+
+        '</div><hr style="border:none;border-top:1pt solid #ccc;margin:24pt 0;">'
+      );
+    }
+    const body=bodyParts.join('');
+    const html='<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'+
+      '<head><meta charset="utf-8"><title>'+esc(campName)+'</title>'+
+      '<style>body{font-family:Georgia,serif;margin:1in;} h1{font-family:Georgia,serif;font-size:24pt;color:#8b0000;text-align:center;margin-bottom:4pt;} .subtitle{text-align:center;font-style:italic;color:#555;margin-bottom:30pt;}</style>'+
+      '</head><body>'+
+      '<h1>'+esc(campName)+'</h1>'+
+      '<p class="subtitle">Diário de Campanha</p>'+
+      body+
+      '</body></html>';
+    const blob=new Blob(['\ufeff'+html],{type:'application/msword'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=campName.replace(/[^a-zA-Z0-9]/g,'_')+'_diario.doc';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  }catch(err){
+    console.error('Export error:',err);
+    alert('Erro ao exportar: '+err.message);
+  }
+}
+
+function refreshTypeFilter(){const types=Array.from(new Set(AC().fichas.map(function(f){return f.type;}).filter(Boolean))).sort();const s=document.getElementById('fichaTypeFilter');const cur=s.value;s.innerHTML='<option value="">Todos os Tipos</option>'+types.map(function(t){return'<option value="'+t+'"'+(t===cur?' selected':'')+'>'+t+'</option>';}).join('');}
+function addFicha(){
+  const name=document.getElementById('fName').value.trim();if(!name){alert('Digite o nome!');return;}
+  const hpMax=parseInt(document.getElementById('fHpMax').value)||null;
+  const ac=parseInt(document.getElementById('fAc').value)||null;
+  const initBonus=parseInt(document.getElementById('fInitBonus').value);
+  const type=document.getElementById('fType').value.trim()||null;
+  const fi=document.getElementById('fImg');
+  function finish(img){
+    AC().fichas.push({id:Date.now(),name:name,hpMax:hpMax,ac:ac,initBonus:isNaN(initBonus)?null:initBonus,type:type,img:img||null});
+    ['fName','fHpMax','fAc','fInitBonus','fType'].forEach(function(i){document.getElementById(i).value='';});
+    fi.value='';persist();renderFichas();refreshFichaSelect();refreshTypeFilter();
+  }
+  if(fi.files&&fi.files[0]){const r=new FileReader();r.onload=function(e){finish(e.target.result);};r.readAsDataURL(fi.files[0]);}else finish(null);
+}
+function renderFichas(){
+  const el=document.getElementById('fichasGrid');
+  const term=(document.getElementById('fichaSearch').value||'').trim().toLowerCase();
+  const tf=document.getElementById('fichaTypeFilter').value;
+  let fichas=AC().fichas.slice();
+  if(term)fichas=fichas.filter(function(f){return f.name.toLowerCase().includes(term)||(f.type||'').toLowerCase().includes(term);});
+  if(tf)fichas=fichas.filter(function(f){return f.type===tf;});
+  document.getElementById('fichaCount').textContent=fichas.length<AC().fichas.length?fichas.length+'/'+AC().fichas.length+' fichas':'';
+  if(!fichas.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhuma ficha.</div>';return;}
+  el.innerHTML=fichas.map(function(f){
+    return '<div class="fCard" draggable="true" ondragstart="fDragStart(event,'+f.id+')" ondragover="fDragOver(event)" ondrop="fDrop(event,'+f.id+')" ondragleave="this.classList.remove(&#39;drag-over&#39;)">'+
+      '<div class="fImg" onclick="openImgViewer('+f.id+',&#39;ficha&#39;)">'+(f.img?'<img src="'+f.img+'" alt="'+f.name+'">':'⬡')+'</div>'+
+      '<div class="fName">'+f.name+'</div>'+
+      (f.type?'<div class="tBadge">'+f.type+'</div>':'')+
+      '<div class="fMeta">'+[f.hpMax?'HP:'+f.hpMax:'',f.ac?'AC:'+f.ac:'',f.initBonus!=null?'Init:'+(f.initBonus>=0?'+':'')+f.initBonus:''].filter(Boolean).join(' · ')+'</div>'+
+      '<button class="btn btnOut sm" style="width:100%;margin-top:.3rem" onclick="openEditFicha('+f.id+')">✏ Editar</button>'+
+      '<button class="btn btnDng sm" style="width:100%;margin-top:.3rem" onclick="removeFicha('+f.id+')">✕ Remover</button>'+
+    '</div>';
+  }).join('');
+}
+function openImgViewer(id,type){
+  let img=null;
+  if(type==='ficha'){const f=AC().fichas.find(function(f){return f.id===id;});img=f?f.img:null;}
+  else if(type==='item'){const it=(AC().itens||[]).find(function(it){return it.id===id;});img=it?it.img:null;}
+  if(!img)return;
+  document.getElementById('mImgSrc').src=img;openM('mImgViewer');
+}
+function openEditFicha(id){
+  const f=AC().fichas.find(function(f){return f.id===id;});if(!f)return;
+  document.getElementById('eFichaId').value=id;
+  document.getElementById('eFichaNome').value=f.name;
+  document.getElementById('eFichaHp').value=f.hpMax||'';
+  document.getElementById('eFichaAc').value=f.ac||'';
+  document.getElementById('eFichaInitBonus').value=f.initBonus!=null?f.initBonus:'';
+  document.getElementById('eFichaTipo').value=f.type||'';
+  document.getElementById('eFichaImg').value='';
+  document.getElementById('eFichaPreview').innerHTML=f.img?'<img src="'+f.img+'" style="max-height:110px;border-radius:3px;border:1px solid var(--border)">':'';
+  openM('mEditFicha');
+}
+function saveEditFicha(){
+  const id=parseInt(document.getElementById('eFichaId').value);
+  const f=AC().fichas.find(function(f){return f.id===id;});if(!f)return;
+  const n=document.getElementById('eFichaNome').value.trim();if(n)f.name=n;
+  const h=parseInt(document.getElementById('eFichaHp').value);if(h)f.hpMax=h;
+  const a=parseInt(document.getElementById('eFichaAc').value);if(a)f.ac=a;
+  const ib=parseInt(document.getElementById('eFichaInitBonus').value);
+  f.initBonus=isNaN(ib)?null:ib;
+  f.type=document.getElementById('eFichaTipo').value.trim()||null;
+  const fi=document.getElementById('eFichaImg');
+  function done(){persist();renderFichas();refreshFichaSelect();refreshTypeFilter();closeM('mEditFicha');}
+  if(fi.files&&fi.files[0]){const r=new FileReader();r.onload=function(e){f.img=e.target.result;done();};r.readAsDataURL(fi.files[0]);}else done();
+}
+function removeFicha(id){if(!confirm('Remover?'))return;const camp=AC();camp.fichas=camp.fichas.filter(function(f){return f.id!==id;});camp.creatures.forEach(function(c){if(String(c.fichaId)===String(id))c.fichaId='';});persist();renderFichas();refreshFichaSelect();refreshTypeFilter();renderCreatures();}
+function fDragStart(e,id){fDragSrc=id;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+function fDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
+function fDrop(e,tid){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(fDragSrc===tid)return;const fichas=AC().fichas;const si=fichas.findIndex(function(x){return x.id===fDragSrc;}),ti=fichas.findIndex(function(x){return x.id===tid;});if(si<0||ti<0)return;const item=fichas.splice(si,1)[0];fichas.splice(ti,0,item);document.querySelectorAll('#fichasGrid .fCard').forEach(function(el){el.classList.remove('dragging');});persist();renderFichas();}
+
+function openGenPopup(name,img){
+  document.getElementById('mGenPopupName').textContent=name;
+  const i=document.getElementById('mGenPopupImg'),n=document.getElementById('mGenPopupNoImg');
+  if(img){i.src=img;i.style.display='block';n.style.display='none';}else{i.style.display='none';n.style.display='block';}
+  openM('mGenPopup');
+}
+function openItemPopupByName(name){const it=(AC().itens||[]).find(function(it){return it.name===name;});if(it)openGenPopup(it.name,it.img||null);}
+
+function showPjForm(){
+  document.getElementById('pjForm').style.display='block';
+  document.getElementById('btnShowPjForm').style.display='none';
+  ['pj_nome','pj_hp','pj_ac','pj_classe','pj_pp','pj_bg'].forEach(function(id){const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('pj_cristais').value='0';
+  ['pj_at1t','pj_at2t','pj_at3t'].forEach(function(id){const el=document.getElementById(id);if(el)el.value='';});
+  populateNewPJSelects([]);
+}
+function hidePjForm(){document.getElementById('pjForm').style.display='none';document.getElementById('btnShowPjForm').style.display='inline-block';}
+function addPJ(){
+  const camp=AC();if(!camp.personagens)camp.personagens=[];
+  const nome=document.getElementById('pj_nome').value.trim();if(!nome){alert('Digite o nome!');return;}
+  const fi=document.getElementById('pj_img');
+  const data={
+    id:Date.now(),name:nome,
+    hpMax:parseInt(document.getElementById('pj_hp').value)||null,
+    ac:parseInt(document.getElementById('pj_ac').value)||null,
+    type:document.getElementById('pj_classe').value.trim()||null,
+    pp:parseInt(document.getElementById('pj_pp').value)||null,
+    cristais:parseInt(document.getElementById('pj_cristais').value)||0,
+    attunados:getAtVals('pj').filter(Boolean),
+    bg:document.getElementById('pj_bg').value.trim()||null,img:null
+  };
+  function finish(img){data.img=img||null;camp.personagens.push(data);hidePjForm();persist();renderPJs();refreshPJSelectInParty();}
+  if(fi&&fi.files&&fi.files[0]){const r=new FileReader();r.onload=function(e){finish(e.target.result);};r.readAsDataURL(fi.files[0]);}else finish(null);
+}
+function openEditPJ(id){
+  const p=(AC().personagens||[]).find(function(p){return String(p.id)===String(id);});
+  if(!p)return;
+  document.getElementById('epj_id').value=p.id;
+  document.getElementById('epj_nome').value=p.name||'';
+  document.getElementById('epj_hp').value=p.hpMax||'';
+  document.getElementById('epj_ac').value=p.ac||'';
+  document.getElementById('epj_classe').value=p.type||'';
+  document.getElementById('epj_pp').value=p.pp||'';
+  document.getElementById('epj_cristais').value=p.cristais||0;
+  document.getElementById('epj_bg').value=p.bg||'';
+  document.getElementById('epj_img').value='';
+  document.getElementById('epj_preview').innerHTML=p.img?'<img src="'+p.img+'" style="max-height:110px;border-radius:3px;border:1px solid var(--border)">':'';
+  openM('mEditPJ');
+  populateEditPJSelects(p.id,p.attunados||[]);
+}
+function saveEditPJ(){
+  const id=parseInt(document.getElementById('epj_id').value);
+  const p=(AC().personagens||[]).find(function(p){return String(p.id)===String(id);});if(!p)return;
+  const n=document.getElementById('epj_nome').value.trim();if(n)p.name=n;
+  const h=parseInt(document.getElementById('epj_hp').value);if(h)p.hpMax=h;
+  const a=parseInt(document.getElementById('epj_ac').value);if(a)p.ac=a;
+  p.type=document.getElementById('epj_classe').value.trim()||null;
+  p.pp=parseInt(document.getElementById('epj_pp').value)||null;
+  p.cristais=parseInt(document.getElementById('epj_cristais').value)||0;
+  p.attunados=getAtVals('epj').filter(Boolean);
+  p.bg=document.getElementById('epj_bg').value.trim()||null;
+  const fi=document.getElementById('epj_img');
+  function done(){persist();renderPJs();refreshPJSelectInParty();closeM('mEditPJ');}
+  if(fi&&fi.files&&fi.files[0]){const r=new FileReader();r.onload=function(e){p.img=e.target.result;done();};r.readAsDataURL(fi.files[0]);}else done();
+}
+function removePJ(id){if(!confirm('Remover?'))return;const camp=AC();camp.personagens=(camp.personagens||[]).filter(function(p){return String(p.id)!==String(id);});persist();renderPJs();refreshPJSelectInParty();}
+function openPJPopup(id){
+  const p=(AC().personagens||[]).find(function(p){return String(p.id)===String(id);});if(!p)return;
+  document.getElementById('pjPopName').textContent=p.name;
+  const img=document.getElementById('pjPopImg'),noImg=document.getElementById('pjPopNoImg'),bgEl=document.getElementById('pjPopBg');
+  if(p.img){img.src=p.img;img.style.display='block';noImg.style.display='none';}else{img.style.display='none';noImg.style.display='block';}
+  if(p.bg){bgEl.textContent=p.bg;bgEl.style.display='flex';}else bgEl.style.display='none';
+  openM('mPJPopup');
+}
+function renderPJDash(){
+  const pjs=AC().personagens||[];const el=document.getElementById('pjDash');
+  if(!pjs.length){el.style.display='none';return;}
+  el.style.display='block';
+  const byPP=pjs.filter(function(p){return p.pp!=null;}).sort(function(a,b){return b.pp-a.pp;});
+  const byCr=pjs.filter(function(p){return p.cristais>0;}).sort(function(a,b){return b.cristais-a.cristais;});
+  const withAt=pjs.filter(function(p){return p.attunados&&p.attunados.length>0;});
+  function row(n,v){return'<div class="dbRow"><span>'+n+'</span><span>'+v+'</span></div>';}
+  const empty='<span style="font-family:var(--fB);font-size:.82rem;color:var(--muted);font-style:italic">—</span>';
+  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.7rem">'+
+    '<div class="dbPanel"><div class="dbTitle">👁 Passive Perception</div>'+(byPP.length?byPP.map(function(p){return row(p.name,p.pp);}).join(''):empty)+'</div>'+
+    '<div class="dbPanel"><div class="dbTitle">💎 Cristais</div>'+(byCr.length?byCr.map(function(p){return row(p.name,p.cristais);}).join(''):empty)+'</div>'+
+    '<div class="dbPanel"><div class="dbTitle">⚡ Itens Attunados</div>'+(withAt.length?withAt.map(function(p){
+      var rows=p.attunados.map(function(it){
+        var safe=it.replace(/'/g,"&#39;");
+        return '<div style="font-family:var(--fB);font-size:.85rem;padding:.1rem 0 .1rem .6rem;border-left:2px solid var(--border);cursor:pointer;color:var(--red)" onclick="openItemPopupByName(\''+safe+'\')">• '+it+'</div>';
+      }).join('');
+      return '<div style="margin-bottom:.35rem"><div style="font-family:var(--fH);font-weight:600;font-size:.82rem;color:var(--muted)">'+p.name+'</div>'+rows+'</div>';
+    }).join(''):empty)+'</div>'+
+  '</div>';
+}
+function renderPJs(){
+  renderPJDash();
+  const el=document.getElementById('pjGrid');const pjs=AC().personagens||[];
+  if(!pjs.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum personagem ainda.</div>';return;}
+  el.innerHTML=pjs.map(function(p){
+    return '<div class="fCard" draggable="true" ondragstart="pjDrag(event,'+p.id+')" ondragover="pjDragOv(event)" ondrop="pjDrop(event,'+p.id+')" ondragleave="this.classList.remove(&#39;drag-over&#39;)">'+
+      '<div class="fImg" onclick="openPJPopup('+p.id+')">'+(p.img?'<img src="'+p.img+'" alt="'+p.name+'">':'⬡')+'</div>'+
+      '<div class="fName">'+p.name+'</div>'+
+      (p.type?'<div class="tBadge">'+p.type+'</div>':'')+
+      '<div class="fMeta">'+[p.hpMax?'HP:'+p.hpMax:'',p.ac?'AC:'+p.ac:'',p.pp?'PP:'+p.pp:'',p.cristais?'💎'+p.cristais:''].filter(Boolean).join(' · ')+'</div>'+
+      (p.attunados&&p.attunados.length?'<div style="font-family:var(--fN);font-size:.68rem;color:var(--muted);margin-bottom:.3rem">'+p.attunados.map(function(it){
+        var safe=it.replace(/'/g,"&#39;");
+        return '<span style="cursor:pointer;color:var(--red)" onclick="openItemPopupByName(\''+safe+'\')">⚡ '+it+'</span>';
+      }).join(' · ')+'</div>':'')+
+      (p.bg?'<div style="font-family:var(--fB);font-size:.75rem;color:var(--muted);font-style:italic;margin-bottom:.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+p.bg+'</div>':'')+
+      '<button class="btn btnOut sm" style="width:100%;margin-top:.3rem" onclick="openEditPJ('+p.id+')">✏ Editar</button>'+
+      '<button class="btn btnDng sm" style="width:100%;margin-top:.3rem" onclick="removePJ('+p.id+')">✕ Remover</button>'+
+    '</div>';
+  }).join('');
+}
+function pjDrag(e,id){pjDragSrc=id;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+function pjDragOv(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
+function pjDrop(e,tid){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(pjDragSrc===tid)return;const pjs=AC().personagens||[];const si=pjs.findIndex(function(x){return x.id===pjDragSrc;}),ti=pjs.findIndex(function(x){return x.id===tid;});if(si<0||ti<0)return;const item=pjs.splice(si,1)[0];pjs.splice(ti,0,item);document.querySelectorAll('#pjGrid .fCard').forEach(function(el){el.classList.remove('dragging');});persist();renderPJs();}
+
+function populateNewPJSelects(savedVals){
+  const sv=savedVals||[];
+  const all=(AC().itens||[]).filter(function(it){return it.attune==='yes';});
+  const usedByAll=(AC().personagens||[]).reduce(function(acc,p){return acc.concat(p.attunados||[]);},[]).filter(function(n){return all.some(function(it){return it.name===n;});});
+  for(let i=0;i<3;i++){
+    const sel=document.getElementById('pj_at'+(i+1)+'s');if(!sel)continue;
+    const otherIds=['pj_at1s','pj_at2s','pj_at3s'].filter(function(_,j){return j!==i;});
+    const usedOther=otherIds.map(function(id){const e=document.getElementById(id);return e?e.value:'';}).filter(function(v){return v&&all.some(function(it){return it.name===v;});});
+    const blocked=Array.from(new Set(usedByAll.concat(usedOther)));
+    const savedVal=sv[i]||'';
+    sel.innerHTML='<option value="">— vincular item —</option>'+all.filter(function(it){return blocked.indexOf(it.name)===-1||it.name===savedVal;}).map(function(it){return'<option value="'+it.name+'"'+(savedVal===it.name?' selected':'')+'>'+it.name+(it.raridade?' ('+it.raridade+')':'')+'</option>';}).join('');
+  }
+}
+function populateEditPJSelects(pjId,savedVals){
+  const sv=savedVals||[];
+  const all=(AC().itens||[]).filter(function(it){return it.attune==='yes';});
+  const usedByOthers=(AC().personagens||[]).filter(function(p){return String(p.id)!==String(pjId);}).reduce(function(acc,p){return acc.concat(p.attunados||[]);},[]).filter(function(n){return all.some(function(it){return it.name===n;});});
+  for(let i=0;i<3;i++){
+    const sel=document.getElementById('epj_at'+(i+1)+'s');if(!sel)continue;
+    const otherIds=['epj_at1s','epj_at2s','epj_at3s'].filter(function(_,j){return j!==i;});
+    const usedOther=otherIds.map(function(id){const e=document.getElementById(id);return e?e.value:'';}).filter(function(v){return v&&all.some(function(it){return it.name===v;});});
+    const blocked=Array.from(new Set(usedByOthers.concat(usedOther)));
+    const savedVal=sv[i]||'';
+    const isItem=all.some(function(it){return it.name===savedVal;});
+    sel.innerHTML='<option value="">— vincular item —</option>'+all.filter(function(it){return blocked.indexOf(it.name)===-1||it.name===savedVal;}).map(function(it){return'<option value="'+it.name+'"'+(savedVal===it.name?' selected':'')+'>'+it.name+(it.raridade?' ('+it.raridade+')':'')+'</option>';}).join('');
+    const txt=document.getElementById('epj_at'+(i+1)+'t');
+    if(txt)txt.value=savedVal&&!isItem?savedVal:'';
+  }
+}
+function getAtVals(prefix){
+  const res=[];
+  for(let i=1;i<=3;i++){
+    const sel=document.getElementById(prefix+'_at'+i+'s');
+    const txt=document.getElementById(prefix+'_at'+i+'t');
+    const sv=sel?sel.value.trim():'';
+    const tv=txt?txt.value.trim():'';
+    res.push(sv||tv||'');
+  }
+  return res;
+}
+
+function refreshItTypeFilter(){const types=Array.from(new Set((AC().itens||[]).map(function(it){return it.tipo;}).filter(Boolean))).sort();const s=document.getElementById('itTypeFilter');const cur=s.value;s.innerHTML='<option value="">Todos os Tipos</option>'+types.map(function(t){return'<option value="'+t+'"'+(t===cur?' selected':'')+'>'+t+'</option>';}).join('');}
+function addItem(){
+  const camp=AC();if(!camp.itens)camp.itens=[];
+  const nome=document.getElementById('it_nome').value.trim();if(!nome){alert('Digite o nome!');return;}
+  const fi=document.getElementById('it_img');
+  const data={id:Date.now(),name:nome,tipo:document.getElementById('it_tipo').value.trim()||null,raridade:document.getElementById('it_raridade').value||null,attune:document.getElementById('it_attune').value,desc:document.getElementById('it_desc').value.trim()||null,img:null};
+  function finish(img){
+    data.img=img||null;camp.itens.push(data);
+    ['it_nome','it_tipo','it_desc'].forEach(function(i){document.getElementById(i).value='';});
+    document.getElementById('it_raridade').value='';
+    document.getElementById('it_attune').value='no';
+    if(fi)fi.value='';
+    persist();renderItens();refreshItTypeFilter();
+  }
+  if(fi&&fi.files&&fi.files[0]){const r=new FileReader();r.onload=function(e){finish(e.target.result);};r.readAsDataURL(fi.files[0]);}else finish(null);
+}
+function renderItens(){
+  const el=document.getElementById('itensGrid');
+  const term=(document.getElementById('itSearch').value||'').trim().toLowerCase();
+  const rarF=document.getElementById('itRarFilter').value;
+  const typeF=document.getElementById('itTypeFilter').value;
+  const sort=document.getElementById('itSort').value;
+  let itens=(AC().itens||[]).slice();
+  if(term)itens=itens.filter(function(it){return it.name.toLowerCase().includes(term)||(it.tipo||'').toLowerCase().includes(term)||(it.desc||'').toLowerCase().includes(term);});
+  if(rarF)itens=itens.filter(function(it){return it.raridade===rarF;});
+  if(typeF)itens=itens.filter(function(it){return it.tipo===typeF;});
+  if(sort==='type')itens.sort(function(a,b){return(a.tipo||'').localeCompare(b.tipo||'');});
+  else if(sort==='rar_asc')itens.sort(function(a,b){return RAR_ORDER.indexOf(a.raridade)-RAR_ORDER.indexOf(b.raridade);});
+  else if(sort==='rar_desc')itens.sort(function(a,b){return RAR_ORDER.indexOf(b.raridade)-RAR_ORDER.indexOf(a.raridade);});
+  const total=(AC().itens||[]).length;
+  document.getElementById('itCount').textContent=itens.length<total?itens.length+'/'+total+' itens':'';
+  if(!itens.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum item encontrado.</div>';return;}
+  el.innerHTML=itens.map(function(it){
+    const rc=RAR_COLORS[it.raridade]||'var(--muted)';
+    const rb=RAR_BG[it.raridade]||'var(--bg3)';
+    return '<div class="fCard" draggable="true" ondragstart="itDragStart(event,'+it.id+')" ondragover="itDragOver(event)" ondrop="itDrop(event,'+it.id+')" ondragleave="this.classList.remove(&#39;drag-over&#39;)">'+
+      '<div class="fImg" onclick="openItemPopup('+it.id+')">'+(it.img?'<img src="'+it.img+'" alt="'+it.name+'">':'⬡')+'</div>'+
+      '<div class="fName">'+it.name+'</div>'+
+      (it.raridade?'<div style="display:inline-block;font-family:var(--fN);font-size:.62rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;background:'+rb+';color:'+rc+';border:1px solid '+rc+';margin-bottom:.25rem">'+it.raridade+'</div>':'')+
+      '<div class="fMeta">'+[it.tipo||'',it.attune==='yes'?'⚡ Attunement':''].filter(Boolean).join(' · ')+'</div>'+
+      (it.desc?'<div style="font-family:var(--fB);font-size:.75rem;color:var(--muted);font-style:italic;margin-bottom:.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+it.desc+'</div>':'')+
+      '<button class="btn btnOut sm" style="width:100%;margin-top:.3rem" onclick="openEditItem('+it.id+')">✏ Editar</button>'+
+      '<button class="btn btnDng sm" style="width:100%;margin-top:.3rem" onclick="removeItem('+it.id+')">✕ Remover</button>'+
+    '</div>';
+  }).join('');
+}
+function openItemPopup(id){
+  const it=(AC().itens||[]).find(function(it){return it.id===id;});if(!it)return;
+  document.getElementById('itPopName').textContent=it.name;
+  const img=document.getElementById('itPopImg'),noImg=document.getElementById('itPopNoImg');
+  if(it.img){img.src=it.img;img.style.display='block';noImg.style.display='none';}else{img.style.display='none';noImg.style.display='block';}
+  const rc=RAR_COLORS[it.raridade]||'#f0e8d8';
+  document.getElementById('itPopInfo').innerHTML=
+    (it.raridade?'<div style="font-family:var(--fN);font-size:.75rem;font-weight:700;color:'+rc+';margin-bottom:.3rem;text-transform:uppercase">'+it.raridade+'</div>':'')+
+    (it.tipo?'<div style="font-family:var(--fN);font-size:.8rem;color:rgba(240,232,216,.7);margin-bottom:.5rem">'+it.tipo+(it.attune==='yes'?' · ⚡ Requires Attunement':'')+'</div>':(it.attune==='yes'?'<div style="font-family:var(--fN);font-size:.8rem;color:rgba(240,232,216,.7);margin-bottom:.5rem">⚡ Requires Attunement</div>':''))+
+    (it.desc?'<div style="font-family:var(--fB);font-size:.95rem;line-height:1.75;white-space:pre-wrap;color:#f0e8d8">'+it.desc+'</div>':'<div style="font-family:var(--fB);font-size:.9rem;color:rgba(240,232,216,.5);font-style:italic">Sem descrição.</div>');
+  openM('mItemPopup');
+}
+function openEditItem(id){
+  const it=(AC().itens||[]).find(function(it){return it.id===id;});if(!it)return;
+  document.getElementById('eItId').value=id;
+  document.getElementById('eItNome').value=it.name;
+  document.getElementById('eItTipo').value=it.tipo||'';
+  document.getElementById('eItRar').value=it.raridade||'';
+  document.getElementById('eItAttune').value=it.attune||'no';
+  document.getElementById('eItDesc').value=it.desc||'';
+  document.getElementById('eItImg').value='';
+  document.getElementById('eItPreview').innerHTML=it.img?'<img src="'+it.img+'" style="max-height:110px;border-radius:3px;border:1px solid var(--border)">':'';
+  openM('mEditItem');
+}
+function saveEditItem(){
+  const id=parseInt(document.getElementById('eItId').value);
+  const it=(AC().itens||[]).find(function(it){return it.id===id;});if(!it)return;
+  const n=document.getElementById('eItNome').value.trim();if(n)it.name=n;
+  it.tipo=document.getElementById('eItTipo').value.trim()||null;
+  it.raridade=document.getElementById('eItRar').value||null;
+  it.attune=document.getElementById('eItAttune').value;
+  it.desc=document.getElementById('eItDesc').value.trim()||null;
+  const fi=document.getElementById('eItImg');
+  function done(){persist();renderItens();refreshItTypeFilter();closeM('mEditItem');}
+  if(fi&&fi.files&&fi.files[0]){const r=new FileReader();r.onload=function(e){it.img=e.target.result;done();};r.readAsDataURL(fi.files[0]);}else done();
+}
+function removeItem(id){if(!confirm('Remover este item?'))return;const camp=AC();camp.itens=(camp.itens||[]).filter(function(it){return it.id!==id;});persist();renderItens();refreshItTypeFilter();}
+function itDragStart(e,id){itDragSrc=id;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+function itDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
+function itDrop(e,tid){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(itDragSrc===tid)return;const itens=AC().itens||[];const si=itens.findIndex(function(x){return x.id===itDragSrc;}),ti=itens.findIndex(function(x){return x.id===tid;});if(si<0||ti<0)return;const item=itens.splice(si,1)[0];itens.splice(ti,0,item);document.querySelectorAll('#itensGrid .fCard').forEach(function(el){el.classList.remove('dragging');});persist();renderItens();}
+
+document.querySelectorAll('.mOv').forEach(function(o){
+  let downTarget=null;
+  o.addEventListener('mousedown',function(e){downTarget=e.target;});
+  o.addEventListener('click',function(e){if(e.target===o&&downTarget===o)o.classList.remove('open');downTarget=null;});
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape')document.querySelectorAll('.mOv.open').forEach(function(m){m.classList.remove('open');});
+  if(e.key==='Enter'&&document.getElementById('mHp').classList.contains('open'))applyHp(hpTgt&&hpTgt.lastType||'dmg');
+});
+
+(async function(){
+  await loadStorage();
+  ensureDefaults();
+  renderAll();
+  const el=document.getElementById('storageStatus');
+  if(el){
+    try{
+      await idbSet('_test','ok');
+      el.textContent='💾 Salvando em IndexedDB (persistente)';
+    }catch(e){
+      try{
+        localStorage.setItem('_test','1');
+        localStorage.removeItem('_test');
+        el.textContent='💾 Salvando em localStorage';
+      }catch(e2){
+        el.textContent='⚠ Sem armazenamento disponível';
+      }
+    }
+  }
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('./sw.js');
+  });
+}
+</script>
+</body>
+</html>
