@@ -767,7 +767,7 @@ function onShortcut(e: KeyboardEvent) {
             {{ row.c.init }}
           </div>
           <div style="flex: 1; min-width: 70px">
-            <div class="cName" title="Ver statblock" @click="openStatblockFromCreature(row.c)">
+            <div class="cName" title="Ver imagem" @click="openImageFromCreature(row.c)">
               {{ row.c.name }}
               <template v-if="fichaName(row.c)"
                 ><br /><span style="font-size: 0.65rem; color: var(--muted); font-style: italic">{{ fichaName(row.c) }}</span></template
@@ -843,7 +843,7 @@ function onShortcut(e: KeyboardEvent) {
             </div>
           </div>
           <div v-if="row.i === camp.currentTurn" class="tInd">⬡ Agindo</div>
-          <button class="btn sm btnOut" title="Ver imagem" @click="openImageFromCreature(row.c)">🖼</button>
+          <button class="btn sm btnOut" title="Ver statblock" @click="openStatblockFromCreature(row.c)">📋</button>
           <button class="btn sm btnOut" title="Editar" @click="openEditCreature(row.c)">✏</button>
           <button class="btn sm btnOut" style="padding: 0.24rem 0.4rem" @click="moveCreature(row.c.id, -1)">↑</button>
           <button class="btn sm btnOut" style="padding: 0.24rem 0.4rem" @click="moveCreature(row.c.id, 1)">↓</button>

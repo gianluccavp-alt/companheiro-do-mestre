@@ -130,18 +130,24 @@ input[type=file]{display:none}
 .atRow{display:flex;gap:.4rem;align-items:center;margin-bottom:.4rem}
 .atRow select,.atRow input[type=text]{flex:1;min-width:0}
 
-/* ===== Modo escuro ===== */
+/* ===== Modo escuro (grafite + branco/dourado) ===== */
 [data-theme="dark"]{
-  --bg:#17120e;--bg2:#201811;--bg3:#2a2018;--light:#241c15;
-  --red:#c62828;--red2:#e04343;--ink:#ece3d2;
-  --border:#6b4423;--border2:#5c3510;
-  --gold:#d4a017;--muted:#b3a082;
+  --bg:#1f2226;--bg2:#282c31;--bg3:#343941;--light:#2a2f35;
+  --red:#d9b44a;--red2:#e8c667;--ink:#f2eee4;
+  --border:#4c525b;--border2:#3b4048;
+  --gold:#e6c86a;--muted:#bcb6a8;
 }
-[data-theme="dark"] .card,[data-theme="dark"] .cRow,[data-theme="dark"] .fCard,[data-theme="dark"] .dEntry,[data-theme="dark"] .dbPanel{box-shadow:0 1px 4px rgba(0,0,0,.4)}
-[data-theme="dark"] .cRow.aTurn{background:#2e2410}
-[data-theme="dark"] .tBanner{background:#2e2410;color:#f0d98a}
+[data-theme="dark"] .card,[data-theme="dark"] .cRow,[data-theme="dark"] .fCard,[data-theme="dark"] .dEntry,[data-theme="dark"] .dbPanel{box-shadow:0 1px 4px rgba(0,0,0,.5)}
+/* A barra de navegação e os botões primários usavam vermelho de fundo: viram grafite/dourado com texto legível. */
+[data-theme="dark"] .nav{background:var(--bg2);border-bottom-color:var(--border2)}
+[data-theme="dark"] .nav-btn{color:rgba(255,255,255,.82);border-color:rgba(230,200,106,.28)}
+[data-theme="dark"] .nav-btn:hover,[data-theme="dark"] .nav-btn.active{background:rgba(255,255,255,.08);border-color:var(--gold);color:var(--gold)}
+[data-theme="dark"] .btnRed{color:#20242a}
+[data-theme="dark"] .diceFab{color:#20242a}
+[data-theme="dark"] .cRow.aTurn{background:#313842}
+[data-theme="dark"] .tBanner{background:#313842;color:var(--gold)}
 [data-theme="dark"] .sPill.conc{background:#1a2f4a;border-color:#3a6ea5;color:#a9d0ff}
-[data-theme="dark"] .sPill.other{background:#3a1a1a;border-color:#a05555;color:#ffb3b3}
+[data-theme="dark"] .sPill.other{background:#3a2a1a;border-color:#a0824f;color:#ffd9a0}
 
 /* ===== Rolador de dados ===== */
 .diceFab{position:fixed;bottom:1.1rem;right:1.1rem;z-index:300;width:56px;height:56px;border-radius:50%;background:var(--red);color:#fff;border:2px solid var(--border2);font-size:1rem;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.35);font-family:var(--fN);line-height:1.1}
