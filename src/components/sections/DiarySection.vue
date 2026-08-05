@@ -219,13 +219,13 @@ function onDrop(e: DragEvent, tid: number) {
       <select
         v-model="sortMode"
         @change="onSortChange"
-        style="font-family: var(--fH); font-size: 0.85rem; background: var(--light); border: 1px solid var(--border); color: var(--ink); padding: 0.35rem 0.6rem; border-radius: 3px"
+        style="width: auto; font-family: var(--fH); font-size: 0.85rem; background: var(--light); border: 1px solid var(--border); color: var(--ink); padding: 0.35rem 0.6rem; border-radius: 3px"
       >
         <option value="timeline">🕑 Linha do Tempo</option>
         <option value="newest">Mais Recente</option>
         <option value="oldest">Mais Antiga</option>
       </select>
-      <button class="btn sm btnRed" style="margin-left: auto" @click="exportWord">📄 Exportar para Word</button>
+      <button class="btn sm btnRed" @click="exportWord">📄 Exportar para Word</button>
     </div>
 
     <div :class="{ dTimeline: timeline }">

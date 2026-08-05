@@ -286,6 +286,8 @@ function openYoutube(s: Song | null) {
 }
 
 onMounted(() => {
+  // Playlists começam minimizadas por padrão ao abrir a ferramenta.
+  playlists.value.forEach((pl) => collapsedPlaylists.add(pl.id))
   ensurePlayer().catch(() => {
     /* sem conexão / API indisponível: tenta de novo ao tocar */
   })
