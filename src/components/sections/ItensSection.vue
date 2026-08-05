@@ -195,7 +195,7 @@ function onDrop(e: DragEvent, tid: number) {
       <span style="font-family: var(--fN); font-size: 0.78rem; color: var(--muted)">{{ countText }}</span>
     </div>
     <p style="font-family: var(--fN); font-size: 0.75rem; color: var(--muted); font-style: italic; margin-bottom: 0.8rem; text-align: center">
-      Clique na imagem para ampliar · Arraste para reordenar
+      Clique na imagem para ampliar
     </p>
 
     <div id="itensGrid" class="fGrid">
