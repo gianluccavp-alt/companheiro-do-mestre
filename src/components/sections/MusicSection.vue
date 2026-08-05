@@ -15,7 +15,7 @@ const songs = computed<Song[]>(() => camp.value?.songs || [])
 const playlists = computed<Playlist[]>(() => camp.value?.playlists || [])
 const cats = MUSIC_CATS
 
-const CAT_ICON: Record<string, string> = { Ambiências: '🌫️', Combate: '⚔️', Outros: '🎵' }
+const CAT_ICON: Record<string, string> = { Ambiências: '🌳', Combate: '⚔️', Outros: '🎵' }
 function catIcon(c: string) {
   return CAT_ICON[c] || '🎵'
 }
@@ -37,14 +37,14 @@ function nextPlaylistId() {
 }
 
 // ---------- Cadastro de músicas ----------
-const form = reactive({ name: '', url: '', desc: '', category: 'Ambiências', playlistId: '' })
+const form = reactive({ name: '', url: '', category: 'Ambiências', playlistId: '' })
 function addSong() {
   const name = form.name.trim()
   const url = form.url.trim()
   if (!name) return alert('Digite o nome da música!')
   if (!url) return alert('Cole o link do YouTube!')
   if (!youtubeId(url)) return alert('O link do YouTube parece inválido.')
-  const song: Song = { id: nextSongId(), name, url, desc: form.desc.trim(), category: form.category }
+  const song: Song = { id: nextSongId(), name, url, category: form.category }
   if (form.playlistId) {
     // Vai direto para uma playlist existente (não entra no acervo).
     const pl = playlists.value.find((p) => p.id === Number(form.playlistId))
@@ -57,7 +57,6 @@ function addSong() {
   // Mantém categoria e playlist selecionadas para facilitar cadastros em sequência.
   form.name = ''
   form.url = ''
-  form.desc = ''
 }
 
 function removeSong(id: number) {
@@ -112,6 +111,20 @@ function removePlaylist(id: number) {
 function renamePlaylist(pl: Playlist) {
   const name = prompt('Novo nome da playlist:', pl.name)
   if (name && name.trim()) pl.name = name.trim()
+}
+// Reordena as playlists dentro da mesma categoria, trocando a posição no array
+// global apenas com a playlist vizinha da mesma categoria.
+function movePlaylist(pl: Playlist, dir: -1 | 1) {
+  const all = camp.value.playlists
+  if (!all) return
+  const cat = pl.category || 'Outros'
+  const sameCat = all.filter((p) => (p.category || 'Outros') === cat)
+  const pos = sameCat.indexOf(pl)
+  const target = sameCat[pos + dir]
+  if (!target) return
+  const i = all.indexOf(pl)
+  const j = all.indexOf(target)
+  ;[all[i], all[j]] = [all[j], all[i]]
 }
 
 // Seleção do <select> "adicionar música do acervo" por playlist.
@@ -317,10 +330,6 @@ onBeforeUnmount(() => {
         <input v-model="form.url" type="text" placeholder="https://www.youtube.com/watch?v=..." />
       </div>
       <div class="fGrp" style="margin-bottom: 0.6rem">
-        <label>Descrição (opcional)</label>
-        <textarea v-model="form.desc" style="min-height: 60px" placeholder="Quando usar, clima, cena..."></textarea>
-      </div>
-      <div class="fGrp" style="margin-bottom: 0.6rem">
         <label>Adicionar direto a uma playlist (opcional)</label>
         <select v-model="form.playlistId">
           <option value="">— Adicionar ao acervo —</option>
@@ -380,11 +389,13 @@ onBeforeUnmount(() => {
         <!-- Playlists nesta categoria -->
         <div v-if="playlistsInCat(cat).length" class="catBlock">
           <div class="catBlockLabel">Playlists</div>
-          <div v-for="pl in playlistsInCat(cat)" :key="pl.id" class="card">
+          <div v-for="(pl, plIndex) in playlistsInCat(cat)" :key="pl.id" class="card">
             <div class="plHead">
               <span class="plName">📃 {{ pl.name }}</span>
               <span class="refCount">{{ pl.songs.length }}</span>
               <span style="margin-left: auto; display: flex; gap: 0.4rem">
+                <button class="btn btnOut sm" :disabled="plIndex === 0" title="Subir playlist" @click="movePlaylist(pl, -1)">▲</button>
+                <button class="btn btnOut sm" :disabled="plIndex === playlistsInCat(cat).length - 1" title="Descer playlist" @click="movePlaylist(pl, 1)">▼</button>
                 <button class="btn btnRed sm" :disabled="!pl.songs.length" @click="playPlaylist(pl)">▶ Tocar</button>
                 <button class="btn btnOut sm" title="Renomear" @click="renamePlaylist(pl)">✏</button>
                 <button class="btn btnDng sm" @click="removePlaylist(pl.id)">✕</button>
