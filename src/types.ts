@@ -110,6 +110,9 @@ export interface Campaign {
   round?: number
   combatLog?: CombatLogEntry[]
   references?: Reference[]
+  // Ordem manual das pastas e subcategorias de referências.
+  refCatOrder?: string[]
+  refSubOrder?: Record<string, string[]>
   songs?: Song[]
   playlists?: Playlist[]
 }

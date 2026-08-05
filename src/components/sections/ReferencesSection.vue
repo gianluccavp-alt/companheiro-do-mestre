@@ -4,6 +4,7 @@ import { useCampaignStore } from '../../stores/campaign'
 import { REF_TYPES } from '../../constants'
 import type { Reference } from '../../types'
 import { fileToDataUrl } from '../../utils/image'
+import { groupReferences } from '../../utils/refGroups'
 import BaseModal from '../ui/BaseModal.vue'
 import ImagePopup from '../ui/ImagePopup.vue'
 import ReferenceView from '../ui/ReferenceView.vue'
@@ -106,24 +107,32 @@ const filtered = computed(() => {
   return list
 })
 
-const NO_CAT = 'Sem categoria'
-// Agrupa em pastas: pai -> filho -> referências.
-const grouped = computed(() => {
-  const parents = new Map<string, Map<string, Reference[]>>()
-  for (const r of filtered.value) {
-    const p = r.catParent?.trim() || NO_CAT
-    const c = r.catChild?.trim() || ''
-    if (!parents.has(p)) parents.set(p, new Map())
-    const children = parents.get(p)!
-    if (!children.has(c)) children.set(c, [])
-    children.get(c)!.push(r)
-  }
-  const sortKeys = (arr: string[]) => arr.sort((a, b) => (a === NO_CAT ? 1 : b === NO_CAT ? -1 : a.localeCompare(b)))
-  return sortKeys([...parents.keys()]).map((p) => ({
-    parent: p,
-    children: [...parents.get(p)!.keys()].sort((a, b) => a.localeCompare(b)).map((c) => ({ child: c, items: parents.get(p)!.get(c)! }))
-  }))
-})
+// Agrupa em pastas: pai -> filho -> referências (respeitando a ordem manual).
+const grouped = computed(() => groupReferences(filtered.value, camp.value.refCatOrder || [], camp.value.refSubOrder || {}))
+// Agrupamento completo (sem filtros) usado como base para reordenar pastas/subcategorias.
+const fullGroups = computed(() => groupReferences(camp.value.references || [], camp.value.refCatOrder || [], camp.value.refSubOrder || {}))
+
+// Move uma pasta (categoria pai) para cima/baixo. A ordem também vale em
+// "Referências Rápidas" na ferramenta de Iniciativa.
+function moveFolder(parent: string, dir: -1 | 1) {
+  const order = fullGroups.value.map((g) => g.parent)
+  const i = order.indexOf(parent)
+  const j = i + dir
+  if (j < 0 || j >= order.length) return
+  ;[order[i], order[j]] = [order[j], order[i]]
+  camp.value.refCatOrder = order
+}
+// Move uma subcategoria dentro da sua pasta.
+function moveSub(parent: string, child: string, dir: -1 | 1) {
+  const grp = fullGroups.value.find((g) => g.parent === parent)
+  if (!grp) return
+  const order = grp.children.map((c) => c.child)
+  const i = order.indexOf(child)
+  const j = i + dir
+  if (j < 0 || j >= order.length) return
+  ;[order[i], order[j]] = [order[j], order[i]]
+  camp.value.refSubOrder = { ...(camp.value.refSubOrder || {}), [parent]: order }
+}
 
 const collapsed = reactive(new Set<string>())
 function toggleFolder(key: string) {
@@ -247,18 +256,26 @@ function openImage(r: Reference) {
 
     <div>
       <div v-if="!filtered.length" class="empty">Nenhuma referência.</div>
-      <div v-for="grp in grouped" :key="grp.parent" class="refFolder">
+      <div v-for="(grp, gi) in grouped" :key="grp.parent" class="refFolder">
         <div class="refFolderHead" @click="toggleFolder(grp.parent)">
           <span class="refFolderCaret">{{ collapsed.has(grp.parent) ? '▸' : '▾' }}</span>
           <span class="refFolderName">📁 {{ grp.parent }}</span>
           <span class="refCount">{{ grp.children.reduce((n, s) => n + s.items.length, 0) }}</span>
+          <span style="margin-left: auto; display: flex; gap: 0.3rem">
+            <button class="btn btnOut sm" :disabled="gi === 0" title="Subir pasta" @click.stop="moveFolder(grp.parent, -1)">▲</button>
+            <button class="btn btnOut sm" :disabled="gi === grouped.length - 1" title="Descer pasta" @click.stop="moveFolder(grp.parent, 1)">▼</button>
+          </span>
         </div>
         <div v-show="!collapsed.has(grp.parent)" class="refFolderBody">
-          <template v-for="sub in grp.children" :key="grp.parent + '/' + sub.child">
+          <template v-for="(sub, si) in grp.children" :key="grp.parent + '/' + sub.child">
             <div v-if="sub.child" class="refSubHead" @click="toggleFolder(grp.parent + '/' + sub.child)">
               <span class="refFolderCaret">{{ collapsed.has(grp.parent + '/' + sub.child) ? '▸' : '▾' }}</span>
               <span>📂 {{ sub.child }}</span>
               <span class="refCount">{{ sub.items.length }}</span>
+              <span style="margin-left: auto; display: flex; gap: 0.3rem">
+                <button class="btn btnOut sm" :disabled="si === 0" title="Subir subcategoria" @click.stop="moveSub(grp.parent, sub.child, -1)">▲</button>
+                <button class="btn btnOut sm" :disabled="si === grp.children.length - 1" title="Descer subcategoria" @click.stop="moveSub(grp.parent, sub.child, 1)">▼</button>
+              </span>
             </div>
             <div v-show="!sub.child || !collapsed.has(grp.parent + '/' + sub.child)" :class="{ refSubBody: sub.child }">
               <div v-for="r in sub.items" :key="r.id" class="card" style="margin-bottom: 0.7rem">

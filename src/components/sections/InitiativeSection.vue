@@ -6,6 +6,7 @@ import type { Creature, Ficha, Reference } from '../../types'
 import { useSettingsStore } from '../../stores/settings'
 import { rollInitiative } from '../../utils/dice'
 import { effectiveDamage, hpBarColor } from '../../utils/combat'
+import { groupReferences } from '../../utils/refGroups'
 import { PLAYER_CHANNEL, type PlayerMessage } from '../../utils/playerChannel'
 import BaseModal from '../ui/BaseModal.vue'
 import ImagePopup from '../ui/ImagePopup.vue'
@@ -595,23 +596,9 @@ function toggleRef(id: number) {
   else openRefIds.add(id)
 }
 
-const REF_NO_CAT = 'Sem categoria'
-const groupedRefs = computed(() => {
-  const parents = new Map<string, Map<string, Reference[]>>()
-  for (const r of filteredRefs.value) {
-    const p = r.catParent?.trim() || REF_NO_CAT
-    const c = r.catChild?.trim() || ''
-    if (!parents.has(p)) parents.set(p, new Map())
-    const children = parents.get(p)!
-    if (!children.has(c)) children.set(c, [])
-    children.get(c)!.push(r)
-  }
-  const sortKeys = (arr: string[]) => arr.sort((a, b) => (a === REF_NO_CAT ? 1 : b === REF_NO_CAT ? -1 : a.localeCompare(b)))
-  return sortKeys([...parents.keys()]).map((p) => ({
-    parent: p,
-    children: [...parents.get(p)!.keys()].sort((a, b) => a.localeCompare(b)).map((c) => ({ child: c, items: parents.get(p)!.get(c)! }))
-  }))
-})
+// Usa o mesmo agrupamento/ordenação da ferramenta de Referências, para que a
+// ordem manual das referências, pastas e subcategorias valha aqui também.
+const groupedRefs = computed(() => groupReferences(filteredRefs.value, camp.value.refCatOrder || [], camp.value.refSubOrder || {}))
 const refCollapsed = reactive(new Set<string>())
 function toggleRefFolder(key: string) {
   if (refCollapsed.has(key)) refCollapsed.delete(key)
