@@ -127,6 +127,17 @@ function movePlaylist(pl: Playlist, dir: -1 | 1) {
   ;[all[i], all[j]] = [all[j], all[i]]
 }
 
+// Playlists minimizadas (viram uma linha compacta, como as músicas).
+const collapsedPlaylists = reactive(new Set<number>())
+function togglePlaylist(id: number) {
+  if (collapsedPlaylists.has(id)) collapsedPlaylists.delete(id)
+  else collapsedPlaylists.add(id)
+}
+// Capa da primeira música da playlist (para exibir quando minimizada).
+function firstThumb(pl: Playlist): string | null {
+  return pl.songs.length ? youtubeThumb(pl.songs[0].url) : null
+}
+
 // Seleção do <select> "adicionar música do acervo" por playlist.
 const addSel = reactive<Record<number, string>>({})
 function addFreeSongToPlaylist(pl: Playlist) {
@@ -389,7 +400,25 @@ onBeforeUnmount(() => {
         <!-- Playlists nesta categoria -->
         <div v-if="playlistsInCat(cat).length" class="catBlock">
           <div class="catBlockLabel">Playlists</div>
-          <div v-for="(pl, plIndex) in playlistsInCat(cat)" :key="pl.id" class="card">
+          <template v-for="(pl, plIndex) in playlistsInCat(cat)" :key="pl.id">
+          <!-- Playlist minimizada: linha compacta com a capa da 1ª música (como as músicas) -->
+          <div v-if="collapsedPlaylists.has(pl.id)" class="card musicRow">
+            <img v-if="firstThumb(pl)" :src="firstThumb(pl)!" :alt="pl.name" class="musicThumb" @click="playPlaylist(pl)" />
+            <div v-else class="musicThumb plThumbEmpty">📃</div>
+            <div class="musicMeta">
+              <div class="musicName">📃 {{ pl.name }} <span class="refCount">{{ pl.songs.length }}</span></div>
+            </div>
+            <div class="musicActions">
+              <button class="btn btnOut sm" :disabled="plIndex === 0" title="Subir playlist" @click="movePlaylist(pl, -1)">▲</button>
+              <button class="btn btnOut sm" :disabled="plIndex === playlistsInCat(cat).length - 1" title="Descer playlist" @click="movePlaylist(pl, 1)">▼</button>
+              <button class="btn btnRed sm" :disabled="!pl.songs.length" @click="playPlaylist(pl)">▶ Tocar</button>
+              <button class="btn btnOut sm" title="Expandir" @click="togglePlaylist(pl.id)">▸</button>
+              <button class="btn btnDng sm" @click="removePlaylist(pl.id)">✕</button>
+            </div>
+          </div>
+
+          <!-- Playlist expandida: card completo -->
+          <div v-else class="card">
             <div class="plHead">
               <span class="plName">📃 {{ pl.name }}</span>
               <span class="refCount">{{ pl.songs.length }}</span>
@@ -397,6 +426,7 @@ onBeforeUnmount(() => {
                 <button class="btn btnOut sm" :disabled="plIndex === 0" title="Subir playlist" @click="movePlaylist(pl, -1)">▲</button>
                 <button class="btn btnOut sm" :disabled="plIndex === playlistsInCat(cat).length - 1" title="Descer playlist" @click="movePlaylist(pl, 1)">▼</button>
                 <button class="btn btnRed sm" :disabled="!pl.songs.length" @click="playPlaylist(pl)">▶ Tocar</button>
+                <button class="btn btnOut sm" title="Minimizar" @click="togglePlaylist(pl.id)">▾</button>
                 <button class="btn btnOut sm" title="Renomear" @click="renamePlaylist(pl)">✏</button>
                 <button class="btn btnDng sm" @click="removePlaylist(pl.id)">✕</button>
               </span>
@@ -424,6 +454,7 @@ onBeforeUnmount(() => {
               <button class="btn btnOut sm" :disabled="!addSel[pl.id]" @click="addFreeSongToPlaylist(pl)">Adicionar</button>
             </div>
           </div>
+          </template>
         </div>
       </template>
       <div v-else class="empty">Nenhuma música ou playlist em {{ cat }}.</div>
@@ -553,6 +584,14 @@ onBeforeUnmount(() => {
   border: 1px solid var(--border);
   cursor: pointer;
   flex-shrink: 0;
+}
+.plThumbEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg3);
+  font-size: 1.4rem;
+  cursor: default;
 }
 .musicMeta {
   flex: 1;
