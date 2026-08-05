@@ -110,6 +110,23 @@ export interface Campaign {
   round?: number
   combatLog?: CombatLogEntry[]
   references?: Reference[]
+  songs?: Song[]
+  playlists?: Playlist[]
+}
+
+// Música individual (link do YouTube) da ferramenta Músicas.
+export interface Song {
+  id: number
+  name: string
+  url: string
+  desc?: string
+}
+
+// Playlist: sequência ordenada de músicas (referência por id).
+export interface Playlist {
+  id: number
+  name: string
+  songIds: number[]
 }
 
 export interface Settings {

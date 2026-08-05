@@ -8,6 +8,7 @@ const tabs = [
   { id: 'sPJs', label: '⬡ Personagens' },
   { id: 'sItens', label: '⬡ Itens Mágicos' },
   { id: 'sSpells', label: '⬡ Magias' },
+  { id: 'sMusic', label: '⬡ Músicas' },
   { id: 'sRefs', label: '⬡ Referências' },
   { id: 'sDiary', label: '⬡ Diário de Campanha' }
 ]

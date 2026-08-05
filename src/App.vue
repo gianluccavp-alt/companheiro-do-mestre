@@ -10,6 +10,7 @@ import FichasSection from './components/sections/FichasSection.vue'
 import PersonagensSection from './components/sections/PersonagensSection.vue'
 import ItensSection from './components/sections/ItensSection.vue'
 import SpellsSection from './components/sections/SpellsSection.vue'
+import MusicSection from './components/sections/MusicSection.vue'
 import ReferencesSection from './components/sections/ReferencesSection.vue'
 import DiarySection from './components/sections/DiarySection.vue'
 
@@ -33,6 +34,7 @@ onMounted(async () => {
     <PersonagensSection :active="active === 'sPJs'" />
     <ItensSection :active="active === 'sItens'" />
     <SpellsSection :active="active === 'sSpells'" />
+    <MusicSection :active="active === 'sMusic'" />
     <ReferencesSection :active="active === 'sRefs'" />
     <DiarySection :active="active === 'sDiary'" />
   </template>

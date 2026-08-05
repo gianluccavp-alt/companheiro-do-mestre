@@ -18,7 +18,9 @@ function newCampaign(name: string): Campaign {
     currentTurn: -1,
     round: 0,
     combatLog: [],
-    references: []
+    references: [],
+    songs: [],
+    playlists: []
   }
 }
 
@@ -95,6 +97,8 @@ export const useCampaignStore = defineStore('campaign', () => {
       if (c.round === undefined) c.round = 0
       if (!c.combatLog) c.combatLog = []
       if (!c.references) c.references = []
+      if (!c.songs) c.songs = []
+      if (!c.playlists) c.playlists = []
     })
   }
 
