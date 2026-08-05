@@ -25,8 +25,7 @@ export const REF_TYPES = [
   { k: 'tabela', l: 'Tabela' },
   { k: 'imagem', l: 'Imagem' },
   { k: 'lista', l: 'Lista' },
-  { k: 'link', l: 'Link' },
-  { k: 'musica', l: 'Música' }
+  { k: 'link', l: 'Link' }
 ]
 
 // Categorias da ferramenta Músicas (aplicadas a músicas e playlists).

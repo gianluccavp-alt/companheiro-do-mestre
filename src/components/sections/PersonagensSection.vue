@@ -404,3 +404,11 @@ function onDrop(e: DragEvent, tid: number) {
 
   <ImagePopup :open="itemPopup.open" :name="itemPopup.name" :img="itemPopup.img" @close="itemPopup.open = false" />
 </template>
+
+<style scoped>
+/* A miniatura quadrada do personagem mostra o topo da imagem (rosto),
+   em vez de puxar do centro. */
+.fImg img {
+  object-position: top;
+}
+</style>

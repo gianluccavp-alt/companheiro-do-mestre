@@ -136,6 +136,27 @@ function removeReference(id: number) {
   camp.value.references = (camp.value.references || []).filter((r) => r.id !== id)
 }
 
+// Reordena manualmente as referências dentro do mesmo grupo (categoria/subcategoria).
+// A ordem no array camp.references também define a ordem em "Referências Rápidas"
+// no painel da ferramenta de Iniciativa.
+function refGroup(r: Reference): Reference[] {
+  const all = camp.value.references || []
+  const p = r.catParent?.trim() || ''
+  const c = r.catChild?.trim() || ''
+  return all.filter((x) => (x.catParent?.trim() || '') === p && (x.catChild?.trim() || '') === c)
+}
+function moveReference(r: Reference, dir: -1 | 1) {
+  const all = camp.value.references
+  if (!all) return
+  const group = refGroup(r)
+  const pos = group.indexOf(r)
+  const target = group[pos + dir]
+  if (!target) return
+  const i = all.indexOf(r)
+  const j = all.indexOf(target)
+  ;[all[i], all[j]] = [all[j], all[i]]
+}
+
 // Editar
 const edit = reactive({ open: false, id: 0, name: '', type: 'texto', content: '', img: null as string | null, url: '', catParent: '', catChild: '' })
 const eImg = ref<HTMLInputElement | null>(null)
@@ -245,6 +266,8 @@ function openImage(r: Reference) {
                   <span style="font-family: var(--fH); font-weight: 700; color: var(--red); font-size: 1.05rem">{{ r.name }}</span>
                   <span class="dtChip" style="border-color: var(--border); color: var(--muted)">{{ typeLabel(r.type) }}</span>
                   <span style="margin-left: auto; display: flex; gap: 0.4rem">
+                    <button class="btn btnOut sm" :disabled="refGroup(r)[0] === r" title="Subir" @click="moveReference(r, -1)">▲</button>
+                    <button class="btn btnOut sm" :disabled="refGroup(r)[refGroup(r).length - 1] === r" title="Descer" @click="moveReference(r, 1)">▼</button>
                     <button class="btn btnOut sm" @click="openEdit(r)">✏</button>
                     <button class="btn btnDng sm" @click="removeReference(r.id)">✕</button>
                   </span>

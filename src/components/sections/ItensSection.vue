@@ -22,7 +22,7 @@ const imgInput = ref<HTMLInputElement | null>(null)
 const search = ref('')
 const rarFilter = ref('')
 const typeFilter = ref('')
-const sort = ref('none')
+const sort = ref('alpha')
 
 const types = computed(() => Array.from(new Set(itens.value.map((it) => it.tipo).filter(Boolean))).sort() as string[])
 
@@ -35,7 +35,8 @@ const filtered = computed(() => {
     )
   if (rarFilter.value) list = list.filter((it) => it.raridade === rarFilter.value)
   if (typeFilter.value) list = list.filter((it) => it.tipo === typeFilter.value)
-  if (sort.value === 'type') list.sort((a, b) => (a.tipo || '').localeCompare(b.tipo || ''))
+  if (sort.value === 'alpha') list.sort((a, b) => a.name.localeCompare(b.name))
+  else if (sort.value === 'type') list.sort((a, b) => (a.tipo || '').localeCompare(b.tipo || ''))
   else if (sort.value === 'rar_asc') list.sort((a, b) => RAR_ORDER.indexOf(a.raridade || '') - RAR_ORDER.indexOf(b.raridade || ''))
   else if (sort.value === 'rar_desc') list.sort((a, b) => RAR_ORDER.indexOf(b.raridade || '') - RAR_ORDER.indexOf(a.raridade || ''))
   return list
@@ -186,7 +187,7 @@ function onDrop(e: DragEvent, tid: number) {
         <option v-for="t in types" :key="t" :value="t">{{ t }}</option>
       </select>
       <select v-model="sort" style="font-family: var(--fH); font-size: 0.85rem; background: var(--light); border: 1px solid var(--border); color: var(--ink); padding: 0.35rem 0.6rem; border-radius: 3px; max-width: 155px">
-        <option value="none">Sem ordenação</option>
+        <option value="alpha">Alfabética</option>
         <option value="type">Por Tipo</option>
         <option value="rar_asc">Menor Raridade</option>
         <option value="rar_desc">Maior Raridade</option>

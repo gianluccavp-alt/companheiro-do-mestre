@@ -15,7 +15,9 @@ const camp = computed(() => store.activeCampaign)
 
 const search = ref('')
 const tagFilter = ref('')
-const timeline = ref(false)
+// Ordenação: 'timeline' (padrão), 'newest', 'oldest'.
+const sortMode = ref('timeline')
+const timeline = computed(() => sortMode.value === 'timeline')
 const dDay = ref('')
 const dTitle = ref('')
 const dBody = ref('')
@@ -90,9 +92,10 @@ function addDiaryEntry() {
   dTags.value = ''
 }
 
-function sortDiary(o: string) {
-  if (o === 'oldest') camp.value.diary.reverse()
-  else camp.value.diary.sort((a, b) => b.id - a.id)
+function onSortChange() {
+  // 'timeline' é uma ordenação de exibição (por id crescente) feita no computed.
+  if (sortMode.value === 'newest') camp.value.diary.sort((a, b) => b.id - a.id)
+  else if (sortMode.value === 'oldest') camp.value.diary.sort((a, b) => a.id - b.id)
 }
 
 function deleteDiary(id: number) {
@@ -213,9 +216,15 @@ function onDrop(e: DragEvent, tid: number) {
 
     <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.8rem; flex-wrap: wrap">
       <span style="font-family: var(--fN); font-size: 0.78rem; color: var(--muted)">Ordenar:</span>
-      <button class="btn sm btnOut" :disabled="timeline" @click="sortDiary('newest')">Mais Recente</button>
-      <button class="btn sm btnOut" :disabled="timeline" @click="sortDiary('oldest')">Mais Antiga</button>
-      <button class="btn sm" :class="timeline ? 'btnRed' : 'btnOut'" @click="timeline = !timeline">🕑 Linha do tempo</button>
+      <select
+        v-model="sortMode"
+        @change="onSortChange"
+        style="font-family: var(--fH); font-size: 0.85rem; background: var(--light); border: 1px solid var(--border); color: var(--ink); padding: 0.35rem 0.6rem; border-radius: 3px"
+      >
+        <option value="timeline">🕑 Linha do Tempo</option>
+        <option value="newest">Mais Recente</option>
+        <option value="oldest">Mais Antiga</option>
+      </select>
       <button class="btn sm btnRed" style="margin-left: auto" @click="exportWord">📄 Exportar para Word</button>
     </div>
 

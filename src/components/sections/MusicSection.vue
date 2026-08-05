@@ -404,9 +404,9 @@ onBeforeUnmount(() => {
           <!-- Playlist minimizada: linha compacta com a capa da 1ª música (como as músicas) -->
           <div v-if="collapsedPlaylists.has(pl.id)" class="card musicRow">
             <img v-if="firstThumb(pl)" :src="firstThumb(pl)!" :alt="pl.name" class="musicThumb" @click="playPlaylist(pl)" />
-            <div v-else class="musicThumb plThumbEmpty">📃</div>
+            <div v-else class="musicThumb plThumbEmpty" @click="playPlaylist(pl)">⬡</div>
             <div class="musicMeta">
-              <div class="musicName">📃 {{ pl.name }} <span class="refCount">{{ pl.songs.length }}</span></div>
+              <div class="musicName">💿 {{ pl.name }} <span class="refCount">{{ pl.songs.length }}</span></div>
             </div>
             <div class="musicActions">
               <button class="btn btnOut sm" :disabled="plIndex === 0" title="Subir playlist" @click="movePlaylist(pl, -1)">▲</button>
@@ -420,7 +420,7 @@ onBeforeUnmount(() => {
           <!-- Playlist expandida: card completo -->
           <div v-else class="card">
             <div class="plHead">
-              <span class="plName">📃 {{ pl.name }}</span>
+              <span class="plName">💿 {{ pl.name }}</span>
               <span class="refCount">{{ pl.songs.length }}</span>
               <span style="margin-left: auto; display: flex; gap: 0.4rem">
                 <button class="btn btnOut sm" :disabled="plIndex === 0" title="Subir playlist" @click="movePlaylist(pl, -1)">▲</button>
@@ -589,9 +589,11 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg3);
-  font-size: 1.4rem;
-  cursor: default;
+  background: var(--bg2);
+  font-size: 2rem;
+  color: var(--red);
+  opacity: 0.7;
+  cursor: pointer;
 }
 .musicMeta {
   flex: 1;
