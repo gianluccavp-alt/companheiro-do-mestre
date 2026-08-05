@@ -2,6 +2,7 @@
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useCampaignStore } from '../../stores/campaign'
 import type { Song, Playlist } from '../../types'
+import { MUSIC_CATS } from '../../constants'
 import { youtubeId, youtubeThumb, youtubeWatchUrl } from '../../utils/youtube'
 import { loadYouTubeApi } from '../../utils/ytPlayer'
 import BaseModal from '../ui/BaseModal.vue'
@@ -12,69 +13,100 @@ const store = useCampaignStore()
 const camp = computed(() => store.activeCampaign)
 const songs = computed<Song[]>(() => camp.value?.songs || [])
 const playlists = computed<Playlist[]>(() => camp.value?.playlists || [])
+const cats = MUSIC_CATS
+
+const CAT_ICON: Record<string, string> = { Ambiências: '🌫️', Combate: '⚔️', Outros: '🎵' }
+function catIcon(c: string) {
+  return CAT_ICON[c] || '🎵'
+}
 
 // ---------- IDs únicos ----------
-function nextId(list: { id: number }[]) {
-  const max = list.reduce((m, x) => Math.max(m, x.id), 0)
+// Considera todas as músicas (acervo + dentro de playlists) para evitar colisões.
+function allSongIds(): number[] {
+  const ids = songs.value.map((s) => s.id)
+  playlists.value.forEach((p) => p.songs.forEach((s) => ids.push(s.id)))
+  return ids
+}
+function nextSongId() {
+  const max = allSongIds().reduce((m, id) => Math.max(m, id), 0)
+  return Math.max(Date.now(), max + 1)
+}
+function nextPlaylistId() {
+  const max = playlists.value.reduce((m, p) => Math.max(m, p.id), 0)
   return Math.max(Date.now(), max + 1)
 }
 
 // ---------- Cadastro de músicas ----------
-const form = reactive({ name: '', url: '', desc: '' })
+const form = reactive({ name: '', url: '', desc: '', category: 'Ambiências', playlistId: '' })
 function addSong() {
   const name = form.name.trim()
   const url = form.url.trim()
   if (!name) return alert('Digite o nome da música!')
   if (!url) return alert('Cole o link do YouTube!')
   if (!youtubeId(url)) return alert('O link do YouTube parece inválido.')
-  if (!camp.value.songs) camp.value.songs = []
-  camp.value.songs.push({ id: nextId(camp.value.songs), name, url, desc: form.desc.trim() })
+  const song: Song = { id: nextSongId(), name, url, desc: form.desc.trim(), category: form.category }
+  if (form.playlistId) {
+    // Vai direto para uma playlist existente (não entra no acervo).
+    const pl = playlists.value.find((p) => p.id === Number(form.playlistId))
+    if (pl) pl.songs.push(song)
+  } else {
+    const c = camp.value
+    if (!c.songs) c.songs = []
+    c.songs.push(song)
+  }
+  // Mantém categoria e playlist selecionadas para facilitar cadastros em sequência.
   form.name = ''
   form.url = ''
   form.desc = ''
 }
 
 function removeSong(id: number) {
-  if (!confirm('Remover esta música? Ela também sairá das playlists.')) return
-  camp.value.songs = (camp.value.songs || []).filter((s) => s.id !== id)
-  // Remove a música de todas as playlists.
-  ;(camp.value.playlists || []).forEach((pl) => {
-    pl.songIds = pl.songIds.filter((sid) => sid !== id)
-  })
+  if (!confirm('Remover esta música do acervo?')) return
+  const c = camp.value
+  c.songs = (c.songs || []).filter((s) => s.id !== id)
   if (nowPlaying.value?.id === id) stop()
 }
 
-// Editar música
-const edit = reactive({ open: false, id: 0, name: '', url: '', desc: '' })
+// Editar música (funciona para qualquer música — acervo ou dentro de playlist).
+const edit = reactive({ open: false, song: null as Song | null, name: '', url: '', desc: '', category: 'Outros' })
 function openEdit(s: Song) {
-  edit.id = s.id
+  edit.song = s
   edit.name = s.name
   edit.url = s.url
   edit.desc = s.desc || ''
+  edit.category = s.category || 'Outros'
   edit.open = true
 }
 function saveEdit() {
-  const s = (camp.value.songs || []).find((x) => x.id === edit.id)
-  if (!s) return
+  if (!edit.song) return
   if (!youtubeId(edit.url.trim())) return alert('O link do YouTube parece inválido.')
-  s.name = edit.name.trim() || s.name
-  s.url = edit.url.trim()
-  s.desc = edit.desc.trim()
+  edit.song.name = edit.name.trim() || edit.song.name
+  edit.song.url = edit.url.trim()
+  edit.song.desc = edit.desc.trim()
+  edit.song.category = edit.category
   edit.open = false
 }
 
 // ---------- Playlists ----------
 const newPlaylistName = ref('')
+const newPlaylistCat = ref('Ambiências')
 function addPlaylist() {
   const name = newPlaylistName.value.trim()
   if (!name) return alert('Digite o nome da playlist!')
-  if (!camp.value.playlists) camp.value.playlists = []
-  camp.value.playlists.push({ id: nextId(camp.value.playlists), name, songIds: [] })
+  const c = camp.value
+  if (!c.playlists) c.playlists = []
+  c.playlists.push({ id: nextPlaylistId(), name, category: newPlaylistCat.value, songs: [] })
   newPlaylistName.value = ''
 }
 function removePlaylist(id: number) {
-  if (!confirm('Remover esta playlist? (As músicas continuam no acervo.)')) return
-  camp.value.playlists = (camp.value.playlists || []).filter((p) => p.id !== id)
+  const pl = playlists.value.find((p) => p.id === id)
+  if (!pl) return
+  if (!confirm('Remover esta playlist? As músicas voltam para o acervo.')) return
+  // Devolve as músicas ao acervo para nada se perder.
+  const c = camp.value
+  if (!c.songs) c.songs = []
+  if (pl.songs.length) c.songs.push(...pl.songs.map((s) => ({ ...s })))
+  c.playlists = (c.playlists || []).filter((p) => p.id !== id)
   if (playingContext.value?.type === 'playlist' && playingContext.value.id === id) stop()
 }
 function renamePlaylist(pl: Playlist) {
@@ -82,27 +114,43 @@ function renamePlaylist(pl: Playlist) {
   if (name && name.trim()) pl.name = name.trim()
 }
 
-// Músicas resolvidas de uma playlist (na ordem, ignorando ids órfãos).
-function playlistSongs(pl: Playlist): Song[] {
-  return pl.songIds.map((id) => songs.value.find((s) => s.id === id)).filter((s): s is Song => !!s)
-}
-
-// Seleção do <select> "adicionar música" por playlist.
+// Seleção do <select> "adicionar música do acervo" por playlist.
 const addSel = reactive<Record<number, string>>({})
-function addSongToPlaylist(pl: Playlist) {
+function addFreeSongToPlaylist(pl: Playlist) {
   const sel = addSel[pl.id]
   if (!sel) return
-  pl.songIds.push(Number(sel))
+  const id = Number(sel)
+  const c = camp.value
+  if (!c.songs) c.songs = []
+  const idx = c.songs.findIndex((s) => s.id === id)
+  if (idx < 0) return
+  // Move a música do acervo para a playlist (some do acervo).
+  const [song] = c.songs.splice(idx, 1)
+  pl.songs.push(song)
   addSel[pl.id] = ''
 }
 function removeFromPlaylist(pl: Playlist, index: number) {
-  pl.songIds.splice(index, 1)
+  const [song] = pl.songs.splice(index, 1)
+  // Devolve ao acervo.
+  const c = camp.value
+  if (!c.songs) c.songs = []
+  if (song) c.songs.push(song)
 }
 function moveInPlaylist(pl: Playlist, index: number, dir: -1 | 1) {
   const j = index + dir
-  if (j < 0 || j >= pl.songIds.length) return
-  const arr = pl.songIds
+  if (j < 0 || j >= pl.songs.length) return
+  const arr = pl.songs
   ;[arr[index], arr[j]] = [arr[j], arr[index]]
+}
+
+// ---------- Filtro e agrupamento por categoria ----------
+const catFilter = ref('')
+const visibleCats = computed(() => (catFilter.value ? [catFilter.value] : cats))
+function songsInCat(cat: string): Song[] {
+  return songs.value.filter((s) => (s.category || 'Outros') === cat)
+}
+function playlistsInCat(cat: string): Playlist[] {
+  return playlists.value.filter((p) => (p.category || 'Outros') === cat)
 }
 
 // ---------- Player ----------
@@ -111,7 +159,6 @@ const playerReady = ref(false)
 const queue = ref<Song[]>([])
 const qIndex = ref(0)
 const repeat = ref(false)
-// Contexto do que está tocando (para exibir e destacar).
 const playingContext = ref<{ type: 'song' | 'playlist'; name: string; id: number } | null>(null)
 
 const nowPlaying = computed<Song | null>(() => queue.value[qIndex.value] || null)
@@ -121,8 +168,6 @@ function isPlayingSong(s: Song) {
   return nowPlaying.value?.id === s.id
 }
 
-// Cria o player uma vez (eager, no onMounted) para preservar o gesto do usuário
-// no primeiro clique — assim o autoplay não é bloqueado pelo navegador.
 async function ensurePlayer(): Promise<any> {
   if (player) return player
   const YT = await loadYouTubeApi()
@@ -137,8 +182,7 @@ async function ensurePlayer(): Promise<any> {
           resolve()
         },
         onStateChange: (e: any) => {
-          // 0 = ENDED
-          if (e.data === 0) onEnded()
+          if (e.data === 0) onEnded() // 0 = ENDED
         }
       }
     })
@@ -164,12 +208,10 @@ async function loadCurrent() {
 
 function onEnded() {
   if (repeat.value) {
-    // Modo repetição: recomeça a mesma faixa.
     player?.seekTo(0)
     player?.playVideo()
     return
   }
-  // Playlist: avança para a próxima música, se houver.
   if (qIndex.value < queue.value.length - 1) {
     qIndex.value++
     loadCurrent()
@@ -184,10 +226,9 @@ function playSong(s: Song) {
 }
 
 function playPlaylist(pl: Playlist, startIndex = 0) {
-  const list = playlistSongs(pl)
-  if (!list.length) return alert('Esta playlist está vazia.')
-  queue.value = list
-  qIndex.value = Math.min(Math.max(0, startIndex), list.length - 1)
+  if (!pl.songs.length) return alert('Esta playlist está vazia.')
+  queue.value = pl.songs.slice()
+  qIndex.value = Math.min(Math.max(0, startIndex), pl.songs.length - 1)
   playingContext.value = { type: 'playlist', name: pl.name, id: pl.id }
   loadCurrent()
 }
@@ -221,10 +262,8 @@ function openYoutube(s: Song | null) {
 }
 
 onMounted(() => {
-  // Inicializa o player em segundo plano (sem vídeo) para que o primeiro
-  // clique já toque imediatamente.
   ensurePlayer().catch(() => {
-    /* sem conexão / API indisponível: tenta novamente ao tocar */
+    /* sem conexão / API indisponível: tenta de novo ao tocar */
   })
 })
 
@@ -268,6 +307,10 @@ onBeforeUnmount(() => {
     <div class="card">
       <div class="fRow">
         <div class="fGrp"><label>Nome</label><input v-model="form.name" type="text" placeholder="Ex: Tema da Taverna" /></div>
+        <div class="fGrp" style="max-width: 170px">
+          <label>Categoria</label>
+          <select v-model="form.category"><option v-for="c in cats" :key="c" :value="c">{{ c }}</option></select>
+        </div>
       </div>
       <div class="fGrp" style="margin-bottom: 0.6rem">
         <label>Link do YouTube</label>
@@ -277,73 +320,102 @@ onBeforeUnmount(() => {
         <label>Descrição (opcional)</label>
         <textarea v-model="form.desc" style="min-height: 60px" placeholder="Quando usar, clima, cena..."></textarea>
       </div>
+      <div class="fGrp" style="margin-bottom: 0.6rem">
+        <label>Adicionar direto a uma playlist (opcional)</label>
+        <select v-model="form.playlistId">
+          <option value="">— Adicionar ao acervo —</option>
+          <option v-for="p in playlists" :key="p.id" :value="String(p.id)">{{ p.name }} ({{ p.category }})</option>
+        </select>
+      </div>
       <div style="text-align: right"><button class="btn btnRed" @click="addSong">+ Adicionar Música</button></div>
     </div>
 
-    <!-- Acervo de músicas -->
-    <h3 class="subTitle">Músicas</h3>
-    <div v-if="!songs.length" class="empty">Nenhuma música cadastrada ainda.</div>
-    <div v-for="s in songs" :key="s.id" class="card musicRow" :class="{ playing: isPlayingSong(s) }">
-      <img v-if="youtubeThumb(s.url)" :src="youtubeThumb(s.url)!" :alt="s.name" class="musicThumb" @click="playSong(s)" />
-      <div class="musicMeta">
-        <div class="musicName">{{ s.name }}</div>
-        <div v-if="s.desc" class="musicDesc">{{ s.desc }}</div>
-      </div>
-      <div class="musicActions">
-        <button class="btn btnRed sm" @click="playSong(s)">▶ Tocar</button>
-        <button class="btn btnOut sm" @click="openYoutube(s)">↗ YouTube</button>
-        <button class="btn btnOut sm" @click="openEdit(s)">✏</button>
-        <button class="btn btnDng sm" @click="removeSong(s.id)">✕</button>
-      </div>
-    </div>
-
-    <!-- Playlists -->
-    <h3 class="subTitle">Playlists</h3>
+    <!-- Criar playlist -->
     <div class="card">
       <div style="display: flex; gap: 0.5rem; align-items: flex-end; flex-wrap: wrap">
-        <div class="fGrp" style="flex: 1; min-width: 180px; margin: 0">
+        <div class="fGrp" style="flex: 1; min-width: 160px; margin: 0">
           <label>Nova playlist</label>
           <input v-model="newPlaylistName" type="text" placeholder="Ex: Combate Épico" @keyup.enter="addPlaylist" />
+        </div>
+        <div class="fGrp" style="max-width: 170px; margin: 0">
+          <label>Categoria</label>
+          <select v-model="newPlaylistCat"><option v-for="c in cats" :key="c" :value="c">{{ c }}</option></select>
         </div>
         <button class="btn btnRed" @click="addPlaylist">+ Criar Playlist</button>
       </div>
     </div>
 
-    <div v-if="!playlists.length" class="empty">Nenhuma playlist criada ainda.</div>
-    <div v-for="pl in playlists" :key="pl.id" class="card">
-      <div class="plHead">
-        <span class="plName">📃 {{ pl.name }}</span>
-        <span class="refCount">{{ pl.songIds.length }}</span>
-        <span style="margin-left: auto; display: flex; gap: 0.4rem">
-          <button class="btn btnRed sm" :disabled="!playlistSongs(pl).length" @click="playPlaylist(pl)">▶ Tocar</button>
-          <button class="btn btnOut sm" title="Renomear" @click="renamePlaylist(pl)">✏</button>
-          <button class="btn btnDng sm" @click="removePlaylist(pl.id)">✕</button>
-        </span>
-      </div>
+    <!-- Filtro de categoria -->
+    <div style="display: flex; gap: 0.5rem; align-items: center; margin: 1rem 0 0.4rem; flex-wrap: wrap">
+      <label style="font-family: var(--fN); font-size: 0.78rem; color: var(--muted)">Filtrar categoria:</label>
+      <select v-model="catFilter" class="plSelect" style="max-width: 220px">
+        <option value="">Todas as categorias</option>
+        <option v-for="c in cats" :key="c" :value="c">{{ catIcon(c) }} {{ c }}</option>
+      </select>
+    </div>
 
-      <div v-if="!playlistSongs(pl).length" class="empty" style="margin: 0.4rem 0">Playlist vazia. Adicione músicas abaixo.</div>
-      <ol v-else class="plList">
-        <li v-for="(s, i) in playlistSongs(pl)" :key="pl.id + '-' + s.id + '-' + i" class="plItem" :class="{ playing: isPlaylist && playingContext?.id === pl.id && isPlayingSong(s) }">
-          <button class="plPlay" title="Tocar a partir daqui" @click="playPlaylist(pl, i)">▶</button>
-          <span class="plItemName">{{ s.name }}</span>
-          <span class="plItemBtns">
-            <button class="btn btnOut sm" :disabled="i === 0" title="Subir" @click="moveInPlaylist(pl, i, -1)">▲</button>
-            <button class="btn btnOut sm" :disabled="i === pl.songIds.length - 1" title="Descer" @click="moveInPlaylist(pl, i, 1)">▼</button>
-            <button class="btn btnDng sm" title="Remover da playlist" @click="removeFromPlaylist(pl, i)">✕</button>
-          </span>
-        </li>
-      </ol>
+    <!-- Seções por categoria -->
+    <div v-for="cat in visibleCats" :key="cat" class="catSection">
+      <h3 class="catHeading">{{ catIcon(cat) }} {{ cat }}</h3>
 
-      <div v-if="songs.length" style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.6rem; flex-wrap: wrap">
-        <select v-model="addSel[pl.id]" class="plSelect">
-          <option value="">+ Adicionar música...</option>
-          <option v-for="s in songs" :key="s.id" :value="String(s.id)">{{ s.name }}</option>
-        </select>
-        <button class="btn btnOut sm" :disabled="!addSel[pl.id]" @click="addSongToPlaylist(pl)">Adicionar</button>
-      </div>
-      <p v-else style="font-family: var(--fN); font-size: 0.72rem; color: var(--muted); font-style: italic; margin: 0.5rem 0 0">
-        Cadastre músicas acima para poder adicioná-las às playlists.
-      </p>
+      <template v-if="songsInCat(cat).length || playlistsInCat(cat).length">
+        <!-- Músicas do acervo nesta categoria -->
+        <div v-if="songsInCat(cat).length" class="catBlock">
+          <div class="catBlockLabel">Músicas</div>
+          <div v-for="s in songsInCat(cat)" :key="s.id" class="card musicRow" :class="{ playing: isPlayingSong(s) }">
+            <img v-if="youtubeThumb(s.url)" :src="youtubeThumb(s.url)!" :alt="s.name" class="musicThumb" @click="playSong(s)" />
+            <div class="musicMeta">
+              <div class="musicName">{{ s.name }}</div>
+              <div v-if="s.desc" class="musicDesc">{{ s.desc }}</div>
+            </div>
+            <div class="musicActions">
+              <button class="btn btnRed sm" @click="playSong(s)">▶ Tocar</button>
+              <button class="btn btnOut sm" @click="openYoutube(s)">↗ YouTube</button>
+              <button class="btn btnOut sm" @click="openEdit(s)">✏</button>
+              <button class="btn btnDng sm" @click="removeSong(s.id)">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Playlists nesta categoria -->
+        <div v-if="playlistsInCat(cat).length" class="catBlock">
+          <div class="catBlockLabel">Playlists</div>
+          <div v-for="pl in playlistsInCat(cat)" :key="pl.id" class="card">
+            <div class="plHead">
+              <span class="plName">📃 {{ pl.name }}</span>
+              <span class="refCount">{{ pl.songs.length }}</span>
+              <span style="margin-left: auto; display: flex; gap: 0.4rem">
+                <button class="btn btnRed sm" :disabled="!pl.songs.length" @click="playPlaylist(pl)">▶ Tocar</button>
+                <button class="btn btnOut sm" title="Renomear" @click="renamePlaylist(pl)">✏</button>
+                <button class="btn btnDng sm" @click="removePlaylist(pl.id)">✕</button>
+              </span>
+            </div>
+
+            <div v-if="!pl.songs.length" class="empty" style="margin: 0.4rem 0">Playlist vazia. Adicione músicas abaixo.</div>
+            <ol v-else class="plList">
+              <li v-for="(s, i) in pl.songs" :key="s.id + '-' + i" class="plItem" :class="{ playing: isPlaylist && playingContext?.id === pl.id && isPlayingSong(s) }">
+                <button class="plPlay" title="Tocar a partir daqui" @click="playPlaylist(pl, i)">▶</button>
+                <span class="plItemName">{{ s.name }}</span>
+                <span class="plItemBtns">
+                  <button class="btn btnOut sm" :disabled="i === 0" title="Subir" @click="moveInPlaylist(pl, i, -1)">▲</button>
+                  <button class="btn btnOut sm" :disabled="i === pl.songs.length - 1" title="Descer" @click="moveInPlaylist(pl, i, 1)">▼</button>
+                  <button class="btn btnOut sm" title="Editar" @click="openEdit(s)">✏</button>
+                  <button class="btn btnDng sm" title="Devolver ao acervo" @click="removeFromPlaylist(pl, i)">✕</button>
+                </span>
+              </li>
+            </ol>
+
+            <div v-if="songs.length" style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.6rem; flex-wrap: wrap">
+              <select v-model="addSel[pl.id]" class="plSelect">
+                <option value="">+ Mover música do acervo...</option>
+                <option v-for="s in songs" :key="s.id" :value="String(s.id)">{{ s.name }}</option>
+              </select>
+              <button class="btn btnOut sm" :disabled="!addSel[pl.id]" @click="addFreeSongToPlaylist(pl)">Adicionar</button>
+            </div>
+          </div>
+        </div>
+      </template>
+      <div v-else class="empty">Nenhuma música ou playlist em {{ cat }}.</div>
     </div>
   </div>
 
@@ -352,8 +424,14 @@ onBeforeUnmount(() => {
     <div class="modal" style="max-width: 480px; width: 92vw">
       <button class="mClose" @click="edit.open = false">✕</button>
       <h3>Editar Música</h3>
-      <div class="fGrp" style="margin-bottom: 0.6rem"><label>Nome</label><input v-model="edit.name" type="text" /></div>
-      <div class="fGrp" style="margin-bottom: 0.6rem"><label>Link do YouTube</label><input v-model="edit.url" type="text" /></div>
+      <div class="fRow">
+        <div class="fGrp"><label>Nome</label><input v-model="edit.name" type="text" /></div>
+        <div class="fGrp" style="max-width: 150px">
+          <label>Categoria</label>
+          <select v-model="edit.category"><option v-for="c in cats" :key="c" :value="c">{{ c }}</option></select>
+        </div>
+      </div>
+      <div class="fGrp" style="margin: 0.6rem 0"><label>Link do YouTube</label><input v-model="edit.url" type="text" /></div>
       <div class="fGrp" style="margin-bottom: 0.8rem"><label>Descrição (opcional)</label><textarea v-model="edit.desc" style="min-height: 70px"></textarea></div>
       <div style="text-align: right"><button class="btn btnRed" @click="saveEdit">Salvar</button></div>
     </div>
@@ -374,14 +452,6 @@ onBeforeUnmount(() => {
 </style>
 
 <style scoped>
-.subTitle {
-  font-family: var(--fH);
-  color: var(--red);
-  font-size: 1.15rem;
-  margin: 1.4rem 0 0.6rem;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.3rem;
-}
 .musicPlayerCard {
   margin-bottom: 1rem;
 }
@@ -431,6 +501,28 @@ onBeforeUnmount(() => {
   display: flex;
   gap: 0.35rem;
   flex-wrap: wrap;
+}
+.catSection {
+  margin-top: 1.2rem;
+}
+.catHeading {
+  font-family: var(--fH);
+  color: var(--red);
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.3rem;
+}
+.catBlock {
+  margin-bottom: 0.8rem;
+}
+.catBlockLabel {
+  font-family: var(--fN);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin: 0.4rem 0 0.4rem 0.1rem;
 }
 .musicRow {
   display: flex;

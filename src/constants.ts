@@ -29,6 +29,9 @@ export const REF_TYPES = [
   { k: 'musica', l: 'Música' }
 ]
 
+// Categorias da ferramenta Músicas (aplicadas a músicas e playlists).
+export const MUSIC_CATS = ['Ambiências', 'Combate', 'Outros']
+
 export const DAMAGE_TYPES = [
   'Acid',
   'Bludgeoning',

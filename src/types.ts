@@ -120,13 +120,18 @@ export interface Song {
   name: string
   url: string
   desc?: string
+  category?: string
 }
 
-// Playlist: sequência ordenada de músicas (referência por id).
+// Playlist: sequência ordenada de músicas próprias (embutidas).
+// Uma música que está numa playlist NÃO aparece no acervo.
 export interface Playlist {
   id: number
   name: string
-  songIds: number[]
+  category?: string
+  songs: Song[]
+  // Legado: modelo antigo por referência, migrado em ensureDefaults.
+  songIds?: number[]
 }
 
 export interface Settings {

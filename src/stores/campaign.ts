@@ -99,6 +99,35 @@ export const useCampaignStore = defineStore('campaign', () => {
       if (!c.references) c.references = []
       if (!c.songs) c.songs = []
       if (!c.playlists) c.playlists = []
+      const campSongs = c.songs
+      // Categoria padrão para músicas antigas do acervo.
+      campSongs.forEach((s) => {
+        if (!s.category) s.category = 'Outros'
+      })
+      // Migração do modelo antigo de playlist (songIds por referência) para o
+      // novo modelo de músicas embutidas (as músicas saem do acervo).
+      const embeddedIds = new Set<number>()
+      c.playlists.forEach((pl) => {
+        if (!pl.category) pl.category = 'Outros'
+        if (!Array.isArray(pl.songs)) {
+          pl.songs = []
+          const legacy = pl.songIds
+          if (Array.isArray(legacy)) {
+            legacy.forEach((id) => {
+              const found = campSongs.find((s) => s.id === id)
+              if (found) {
+                pl.songs.push({ ...found })
+                embeddedIds.add(id)
+              }
+            })
+          }
+        }
+        delete pl.songIds
+        pl.songs.forEach((s) => {
+          if (!s.category) s.category = 'Outros'
+        })
+      })
+      if (embeddedIds.size) c.songs = campSongs.filter((s) => !embeddedIds.has(s.id))
     })
   }
 
