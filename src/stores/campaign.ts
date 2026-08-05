@@ -103,7 +103,8 @@ export const useCampaignStore = defineStore('campaign', () => {
     ensureDefaults()
     try {
       await idbSet('_test', 'ok')
-      storageStatus.value = '💾 Salvando em IndexedDB (persistente)'
+      // Armazenamento persistente funcionando normalmente: não exibe mensagem ao usuário.
+      storageStatus.value = ''
     } catch {
       try {
         localStorage.setItem('_test', '1')

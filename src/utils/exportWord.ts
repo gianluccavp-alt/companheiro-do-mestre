@@ -4,6 +4,12 @@ function esc(s: string): string {
   return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
+// Escapa o texto e converte as quebras de linha digitadas pelo usuário em <br>,
+// garantindo que o Word preserve os parágrafos (pre-wrap não é respeitado de forma confiável).
+function escMultiline(s: string): string {
+  return esc(s).replace(/\r\n?|\n/g, '<br>')
+}
+
 export function exportDiaryToWord(diary: DiaryEntry[], campName: string) {
   const entries = diary.slice().sort((a, b) => a.id - b.id)
   if (!entries.length) {
@@ -23,8 +29,8 @@ export function exportDiaryToWord(diary: DiaryEntry[], campName: string) {
         ' <span style="font-size:10pt;color:#777;font-style:normal;">(' +
         esc(e.date) +
         ')</span></h3>' +
-        '<p style="font-family:Georgia,serif;font-size:12pt;line-height:1.6;color:#1a1008;white-space:pre-wrap;">' +
-        esc(e.body) +
+        '<p style="font-family:Georgia,serif;font-size:12pt;line-height:1.6;color:#1a1008;">' +
+        escMultiline(e.body) +
         '</p>' +
         '</div><hr style="border:none;border-top:1pt solid #ccc;margin:24pt 0;">'
     )
